@@ -15,12 +15,26 @@ st.set_page_config(
 )
 
 def main():
+    # Initialize persistent state variables
+    if "document_text" not in st.session_state:
+        st.session_state.document_text = None
+    if "active_doc_name" not in st.session_state:
+        st.session_state.active_doc_name = None
+    if "summary" not in st.session_state:
+        st.session_state.summary = None
+    if "risks" not in st.session_state:
+        st.session_state.risks = None
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    if "disclaimer_dismissed" not in st.session_state:
+        st.session_state.disclaimer_dismissed = False
+
     st.title("⚖️ LegalLens: AI Legal Co-Pilot & Simulator")
     st.markdown("Democratizing legal documents with plain-English simplification, risk discovery, and autonomous negotiation simulations.")
     
-    # Dismissible Disclaimer
-    if not st.session_state.get("disclaimer_dismissed", False):
-        col_disc, col_btn = st.columns([0.85, 0.15])
+    # Dismissible Disclaimer (State preserved so it never kicks user out)
+    if not st.session_state.disclaimer_dismissed:
+        col_disc, col_btn = st.columns([0.88, 0.12])
         with col_disc:
             st.warning(
                 "**LEGAL NOTICE:** LegalLens provides general informational assistance and educational analysis powered by AI. "
@@ -28,10 +42,10 @@ def main():
                 icon="⚠️"
             )
         with col_btn:
-            if st.button("Dismiss", help="Acknowledge disclaimer and hide this banner"):
+            if st.button("✕ Dismiss", key="btn_dismiss_disclaimer", help="Acknowledge and hide this banner"):
                 st.session_state.disclaimer_dismissed = True
                 st.rerun()
-    
+
     # Sidebar Controls
     with st.sidebar:
         st.header("🌐 Global Settings")
@@ -43,14 +57,38 @@ def main():
         
         st.divider()
         st.header("📄 Primary Document")
-        uploaded_file = st.file_uploader(
-            "Upload Contract / Agreement",
-            type=['pdf', 'txt'],
-            help="Supports searchable PDF and TXT documents up to 50 pages."
-        )
         
-        if uploaded_file is not None:
-            st.caption(f"📁 **File:** `{uploaded_file.name}` ({round(uploaded_file.size / 1024, 1)} KB)")
+        # If document already loaded into session, keep it active and allow reuse!
+        if st.session_state.document_text:
+            st.success(f"📄 **Active Document:**\n\n`{st.session_state.active_doc_name}`")
+            if st.button("🔄 Upload Different Document", key="btn_reset_doc", use_container_width=True):
+                st.session_state.document_text = None
+                st.session_state.active_doc_name = None
+                st.session_state.summary = None
+                st.session_state.risks = None
+                st.session_state.chat_history = []
+                st.rerun()
+        else:
+            uploaded_file = st.file_uploader(
+                "Upload Contract / Agreement",
+                type=['pdf', 'txt'],
+                key="primary_file_uploader",
+                help="Supports searchable PDF and TXT documents up to 50 pages."
+            )
+            
+            if uploaded_file is not None:
+                with st.spinner("Extracting text from document..."):
+                    extracted_text = extract_text_from_file(uploaded_file)
+                    
+                    if not extracted_text or extracted_text.startswith("Error"):
+                        st.error(f"❌ Failed to parse document: {extracted_text}")
+                    else:
+                        st.session_state.document_text = extracted_text
+                        st.session_state.active_doc_name = uploaded_file.name
+                        st.session_state.summary = None
+                        st.session_state.risks = None
+                        st.session_state.chat_history = []
+                        st.rerun()
 
     # Check API key before proceeding
     if not os.environ.get("GEMINI_API_KEY"):
@@ -61,29 +99,10 @@ def main():
         st.info("Example `.env` format:\n```text\nGEMINI_API_KEY=AIzaSy...\n```")
         return
 
-    # Document Extraction & State Management
-    if uploaded_file is not None:
-        if "last_uploaded_file" not in st.session_state or st.session_state.last_uploaded_file != uploaded_file.name:
-            with st.spinner("Extracting text from primary document..."):
-                extracted_text = extract_text_from_file(uploaded_file)
-                
-                # Check for extraction errors or empty results
-                if not extracted_text or extracted_text.startswith("Error"):
-                    st.error(f"❌ Failed to parse document: {extracted_text}")
-                    st.session_state.document_text = None
-                    return
-                
-                st.session_state.document_text = extracted_text
-                st.session_state.last_uploaded_file = uploaded_file.name
-                st.session_state.summary = None
-                st.session_state.risks = None
-                st.session_state.chat_history = []
-                st.session_state.simulation_history = None
-
-        if not st.session_state.get("document_text"):
-            st.warning("Please upload a valid text or searchable PDF document to continue.")
-            return
-
+    # If document is loaded in session, show full application
+    if st.session_state.document_text:
+        st.caption(f"📁 Analyzing: **{st.session_state.active_doc_name}** | Language: **{language}**")
+        
         # Main Interface Tabs
         tab1, tab2, tab3, tab4 = st.tabs([
             "📝 Plain English Summary",
@@ -99,7 +118,7 @@ def main():
             
             col_sum_action, _ = st.columns([0.3, 0.7])
             with col_sum_action:
-                if st.button("Generate Summary", type="primary", use_container_width=True):
+                if st.button("Generate Summary", type="primary", use_container_width=True, key="btn_gen_sum"):
                     with st.spinner("Analyzing document structure and obligations..."):
                         summary = get_document_summary(st.session_state.document_text, language)
                         st.session_state.summary = summary
@@ -111,6 +130,7 @@ def main():
                     data=st.session_state.summary,
                     file_name="legallens_summary.md",
                     mime="text/markdown",
+                    key="dl_summary",
                     help="Export the plain-English summary"
                 )
 
@@ -119,7 +139,7 @@ def main():
             st.subheader("Clause-by-Clause Risk & Red-Flag Analyzer")
             st.caption("Spots predatory clauses like auto-renewals, broad liability, and hidden termination penalties.")
             
-            if st.button("Scan for Hidden Risks", type="primary"):
+            if st.button("Scan for Hidden Risks", type="primary", key="btn_gen_risk"):
                 with st.spinner("Scanning for predatory terms and unfavorable clauses..."):
                     risks = analyze_document_risks(st.session_state.document_text, language)
                     st.session_state.risks = risks
@@ -131,7 +151,8 @@ def main():
                     label="📥 Download Risk Report (Markdown)",
                     data=st.session_state.risks,
                     file_name="legallens_risk_report.md",
-                    mime="text/markdown"
+                    mime="text/markdown",
+                    key="dl_risks"
                 )
                 
                 # --- INTEGRATED AI SIMULATOR ---
@@ -143,7 +164,7 @@ def main():
                     icon="🤖"
                 )
                 
-                if st.button("Launch Live Agent Negotiation", help="Simulate back-and-forth negotiation arguments"):
+                if st.button("Launch Live Agent Negotiation", key="btn_sim_nego", help="Simulate back-and-forth negotiation arguments"):
                     # Step 1: Agent A Opening
                     with st.chat_message("user", avatar="🧑‍⚖️"):
                         with st.spinner("Your AI Lawyer is analyzing the clauses to form an argument..."):
@@ -203,7 +224,7 @@ def main():
             )
             
             if uploaded_file_2 is not None:
-                if st.button("Compare Contract Versions", type="primary"):
+                if st.button("Compare Contract Versions", type="primary", key="btn_compare"):
                     with st.spinner("Extracting and comparing clause differences..."):
                         doc2_text = extract_text_from_file(uploaded_file_2)
                         if not doc2_text or doc2_text.startswith("Error"):
@@ -215,7 +236,8 @@ def main():
                                 label="📥 Download Comparison Report",
                                 data=comparison_result,
                                 file_name="legallens_comparison.md",
-                                mime="text/markdown"
+                                mime="text/markdown",
+                                key="dl_compare"
                             )
             else:
                 st.info("Upload a second document above to compare it against your primary document.")
