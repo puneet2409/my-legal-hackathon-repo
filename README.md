@@ -1,45 +1,116 @@
-# LegalLens: GenAI Legal Assistant
+# ⚖️ LegalLens: AI Legal Co-Pilot & Autonomous Negotiation Simulator
 
 ## 📌 Problem Statement & Chosen Vertical
-**Vertical:** Legal Information & Assistance
-Legal documents are often filled with complex terminology ("legalese") that is difficult for the average person to understand. LegalLens is a GenAI-powered solution designed to democratize legal information. It helps users understand, analyze, and safely navigate legal documents (like contracts, NDAs, and leases) by translating them into plain English and highlighting potential risks. 
+**Vertical:** Legal Information & Basic Assistance  
+Legal information and contracts are notorious for complex terminology ("legalese"), dense structures, and hidden traps that are difficult to navigate without costly professional legal counsel. 
 
-*Note: This tool provides information and assistance, not certified legal advice.*
+**LegalLens** is a modern, GenAI-powered legal co-pilot designed to democratize legal comprehension. It enables consumers, freelancers, and small businesses to:
+1. **Demystify Complex Documents:** Translate contracts, leases, NDAs, and policies into clear, plain language with highlighted obligations and deadlines.
+2. **Expose Hidden Risks & Red Flags:** Automatically spot predatory clauses (auto-renewals, unilateral liability waivers, termination penalties) in structured risk assessment matrices.
+3. **Simulate Autonomous Multi-Agent Negotiations:** Watch two AI agents roleplay a live negotiation between user's counsel and opposing counsel to prepare counter-strategies before signing.
+4. **Compare Contract Versions:** Identify additions, deletions, and subtle clause shifts between initial drafts and counter-party revisions.
+5. **Multi-Language Accessibility:** Instant real-time legal translations across 8 global languages.
 
-## 🚀 Approach and Logic
-We built LegalLens using a highly efficient and lightweight tech stack: **Python and Streamlit** for the frontend/backend, and the **Google Gemini API** for natural language understanding and document analysis. 
+> **⚠️ Responsible AI Notice:** LegalLens provides general informational assistance and educational analysis. It does *not* provide formal legal advice and does *not* replace a licensed attorney.
 
-The application logic follows a clear pipeline:
-1.  **Ingestion:** The user uploads a PDF or TXT file. The `utils/doc_parser.py` safely extracts the raw text.
-2.  **Analysis (Gemini API):** The extracted text is passed to the Gemini model using highly structured system prompts in `utils/ai_helpers.py`.
-    *   *Summarization:* Extracts the core purpose and key obligations.
-    *   *Risk Analysis:* Specifically hunts for common predatory clauses (auto-renewals, hidden fees, extreme liability waivers).
-3.  **Interaction:** A built-in chat interface allows users to ask ad-hoc questions about the document context, keeping state via Streamlit's session state.
-4.  **Security & Compliance:** Explicit disclaimers are placed in the UI. No documents are permanently stored on a server (processed in memory), and API keys are strictly managed via environment variables (never committed to the repo).
+---
 
-## 💡 How the Solution Works
-1.  **Clone the Repository** and navigate to the project folder.
-2.  **Install Dependencies:** Run `pip install -r requirements.txt`.
-3.  **Set up Environment Variables:** Create a `.env` file in the root directory and add your Google API key: `GEMINI_API_KEY=your_api_key_here`.
-4.  **Run the App:** Execute `streamlit run app.py` in your terminal.
-5.  **Use the App:**
-    *   Upload a legal document using the sidebar.
-    *   Read the generated "Plain English" summary.
-    *   Review the "Risk Analysis" section for highlighted clauses.
-    *   Use the Chat tab to ask specific questions like, *"Can they terminate this contract without notice?"*
-6.  **Run Tests:** Execute `pytest tests/` to run unit tests and ensure the core extraction logic works perfectly.
+## 🚀 Approach, Logic & Architecture
+LegalLens is built using a lightweight, modular, and resilient architecture adhering strictly to hackathon performance and repository size rules (< 10 MB):
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Streamlit Frontend                     │
+│  [Plain English Summary] [Risk Table] [Q&A Chat] [Compare]  │
+│          [🎭 Autonomous AI Negotiation Simulator]           │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+               ┌───────────────┴───────────────┐
+               ▼                               ▼
+     ┌───────────────────┐           ┌───────────────────┐
+     │ utils/doc_parser  │           │ utils/ai_helpers  │
+     │  - pypdf parser   │           │  - Gemini API     │
+     │  - UTF-8 fallback │           │  - Tenacity Retry │
+     │  - 50-page guard  │           │  - Model Fallback │
+     └───────────────────┘           └───────────────────┘
+```
+
+### 1. Robust Document Ingestion (`utils/doc_parser.py`)
+- Safe extraction for PDF and TXT formats.
+- Encoding resilience: Automatic fallback between UTF-8 and Latin-1.
+- Page limit guard (up to 50 pages) to protect token budgets and execution speed.
+
+### 2. Enterprise Resilience & Model Fallback (`utils/ai_helpers.py`)
+- **Transient Error Shield:** Integrates `tenacity` exponential backoff (2s → 10s) specifically catching 503 high-demand, 429 rate-limit, and network errors.
+- **Dynamic Key Reloading:** Automatically detects runtime changes in `.env` without requiring process restarts.
+- **Model Fallback Chain:** Gracefully falls back across Gemini 3.6/3.8 Flash models if a specific model experiences regional saturation.
+
+### 3. Privacy & Security By Design
+- Zero permanent server storage: uploaded documents are parsed strictly in memory.
+- API keys are isolated in `.env` and shielded by `.gitignore` to prevent secret leakage on public GitHub repositories.
+- Prominently featured dismissible legal disclaimer to educate users.
+
+---
+
+## 💡 How the Solution Works (Local Setup & Run)
+
+### Prerequisites
+- Python 3.10+ installed
+- Google AI Studio API Key ([Get one free here](https://aistudio.google.com/))
+
+### Installation Steps
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/puneet2409/my-legal-hackathon-repo.git
+   cd my-legal-hackathon-repo
+   ```
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Configure your API Key:**
+   Create a `.env` file in the root directory:
+   ```text
+   GEMINI_API_KEY=AIzaSyYourActualKeyHere
+   ```
+4. **Launch the application:**
+   ```bash
+   streamlit run app.py
+   ```
+5. **Run the Automated Test Suite:**
+   ```bash
+   python -m pytest tests/ -v
+   ```
+
+---
+
+## 🧪 Comprehensive Automated Testing
+The project includes a robust test suite covering:
+- Parsing UTF-8 and Latin-1 encoded text documents.
+- Error handling for unsupported file extensions and empty payloads.
+- Transient error classification (verifying 503/429 retry behavior).
+- Mock-based unit tests for AI summarization, risk analysis, version comparison, and missing key handling.
+
+Run tests anytime with:
+```bash
+python -m pytest tests/ -v
+```
+
+---
 
 ## 🧠 Assumptions Made
-*   Users have access to an internet connection to communicate with the Gemini API.
-*   Uploaded documents are text-searchable (not scanned images requiring OCR, though Gemini can handle images natively, we optimized for text extraction speed and token limits in this prototype).
-*   The primary language of the documents is English.
-*   The user understands the disclaimer that this AI is a co-pilot, not a replacement for a licensed attorney.
+* **Searchable Text:** Uploaded PDFs contain digital text layers rather than scanned flat images.
+* **Informational Purpose:** Users leverage the tool to understand concepts and prepare questions for legal professionals.
+* **Connectivity:** Requires outbound internet access to interact with Google Gemini AI Studio endpoints.
+
+---
 
 ## 🛠 Tech Stack
-*   **Frontend/UI:** Streamlit
-*   **AI/LLM:** Google Gemini API (`google-genai` SDK)
-*   **PDF Parsing:** pypdf
-*   **Testing:** Pytest
+* **UI & Reactive Frontend:** Streamlit 1.38.0
+* **Generative AI Platform:** Google Gemini API via `google-genai` SDK
+* **Fault Tolerance & Resilience:** `tenacity` exponential backoff
+* **Document Parsing Engine:** `pypdf`
+* **Automated Unit Testing:** `pytest`
 
 ---
 *Developed for the Hack2Skill AI Hackathon Challenge.*
