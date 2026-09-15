@@ -13,141 +13,45 @@ except Exception:
 MODEL_ID = 'gemini-3.8-flash'
 
 def get_document_summary(document_text: str, language: str = "English") -> str:
-    """
-    Asks Gemini to summarize a legal document in plain language.
-    """
-    if not client:
-        return "Error: Gemini API key not configured properly."
-        
-    prompt = f"""
-    You are an expert legal assistant whose goal is to make legal documents accessible to everyday people.
-    Please read the following legal document and provide a clear, plain-language summary. 
-    
-    IMPORTANT: You must provide your ENTIRE response in {language}.
-    
-    Focus on:
-    1. The core purpose of the document.
-    2. The main obligations of the parties involved.
-    3. Key dates, durations, or financial commitments if present.
-    
-    Document Text:
-    {document_text}
-    """
-    
-    try:
-        response = client.models.generate_content(
-            model=MODEL_ID,
-            contents=prompt,
-        )
-        return response.text
-    except Exception as e:
-        return f"An error occurred during summarization: {str(e)}"
+    if not client: return "Error: Gemini API key not configured properly."
+    prompt = f"You are an expert legal assistant. Summarize this document in plain language. Respond ENTIRELY in {language}.\n\nFocus on: 1. Core purpose 2. Main obligations 3. Key dates/money.\n\nDoc: {document_text}"
+    try: return client.models.generate_content(model=MODEL_ID, contents=prompt).text
+    except Exception as e: return f"Error: {str(e)}"
 
 def analyze_document_risks(document_text: str, language: str = "English") -> str:
-    """
-    Asks Gemini to identify risks and output a structured Markdown table and negotiation advice.
-    """
-    if not client:
-        return "Error: Gemini API key not configured properly."
-        
-    prompt = f"""
-    You are an expert legal assistant reviewing a document for a client who is not a lawyer.
-    Your goal is to protect the user by identifying "Red Flags" or potentially unfavorable clauses.
-    
-    IMPORTANT: You must provide your ENTIRE response in {language}.
-    
-    Scan the document and highlight any of the following if they exist:
-    - Auto-renewal clauses
-    - Hidden fees or penalties
-    - Extreme liability waivers or indemnification clauses
-    - Forced arbitration or unfair dispute resolution terms
-    - Unusually long notice periods for termination
-    
-    Format your output strictly as follows:
-    
-    ### Clause-by-Clause Risk Analysis
-    Create a Markdown table with the following columns:
-    | Original Clause Snippet | Plain English Translation | Risk Level (High/Medium/Low) |
-    
-    ### Negotiation Suggestions
-    For any clause rated 'High' or 'Medium' risk, provide a short, polite email snippet the user can use to negotiate or push back against that specific clause.
-    
-    If no major risks are found, state that the document appears standard, but remind them to still read carefully.
-    
-    Document Text:
-    {document_text}
-    """
-    
-    try:
-        response = client.models.generate_content(
-            model=MODEL_ID,
-            contents=prompt,
-        )
-        return response.text
-    except Exception as e:
-        return f"An error occurred during risk analysis: {str(e)}"
+    if not client: return "Error: Gemini API key not configured properly."
+    prompt = f"You are an expert legal assistant. Respond ENTIRELY in {language}.\n\nFind Red Flags (auto-renewals, hidden fees, extreme waivers, forced arbitration). Format strictly as a Markdown table: | Original Clause Snippet | Plain English Translation | Risk Level (High/Medium/Low) |\n\nBelow the table, provide Negotiation Suggestions for High/Medium risks.\n\nDoc: {document_text}"
+    try: return client.models.generate_content(model=MODEL_ID, contents=prompt).text
+    except Exception as e: return f"Error: {str(e)}"
 
 def ask_question_about_document(document_text: str, user_question: str, language: str = "English") -> str:
-    """
-    Allows the user to ask a specific question about the uploaded document.
-    """
-    if not client:
-        return "Error: Gemini API key not configured properly."
-        
-    prompt = f"""
-    You are a helpful legal assistant. The user has uploaded a legal document and has a specific question about it.
-    Answer the user's question based ONLY on the provided document text. 
-    If the answer is not in the document, politely state that the document does not cover that specific issue.
-    Always remind the user at the end of your response that you are providing informational assistance, not formal legal advice.
-    
-    IMPORTANT: You must provide your ENTIRE response in {language}.
-    
-    User Question: {user_question}
-    
-    Document Text:
-    {document_text}
-    """
-    
-    try:
-        response = client.models.generate_content(
-            model=MODEL_ID,
-            contents=prompt,
-        )
-        return response.text
-    except Exception as e:
-        return f"An error occurred while answering the question: {str(e)}"
+    if not client: return "Error: Gemini API key not configured properly."
+    prompt = f"You are a legal assistant. Answer the user's question based ONLY on the document. Respond ENTIRELY in {language}.\n\nQuestion: {user_question}\nDoc: {document_text}"
+    try: return client.models.generate_content(model=MODEL_ID, contents=prompt).text
+    except Exception as e: return f"Error: {str(e)}"
 
 def compare_contracts(doc1_text: str, doc2_text: str, language: str = "English") -> str:
-    """
-    Compares two versions of a document to find additions, deletions, and modifications.
-    """
-    if not client:
-        return "Error: Gemini API key not configured properly."
-        
-    prompt = f"""
-    You are an expert legal assistant. The user has provided two versions of a legal document (Document A and Document B).
-    Your task is to compare them and highlight the material differences.
-    
-    IMPORTANT: You must provide your ENTIRE response in {language}.
-    
-    Please structure your response as follows:
-    1. **Summary of Changes:** A high-level overview of what changed (e.g., "The rent increased and a new pet fee was added.")
-    2. **Key Additions:** What is in Document B that was NOT in Document A?
-    3. **Key Deletions:** What was in Document A that was REMOVED in Document B?
-    4. **Modified Clauses:** Which clauses were changed, and how does that impact the user?
-    
-    Document A (Original):
-    {doc1_text}
-    
-    Document B (New/Modified):
-    {doc2_text}
-    """
-    
-    try:
-        response = client.models.generate_content(
-            model=MODEL_ID,
-            contents=prompt,
-        )
-        return response.text
-    except Exception as e:
-        return f"An error occurred during comparison: {str(e)}"
+    if not client: return "Error: Gemini API key not configured properly."
+    prompt = f"Compare Document A and Document B. Respond ENTIRELY in {language}.\n\nStructure: 1. Summary of Changes 2. Key Additions 3. Key Deletions 4. Modified Clauses.\n\nDoc A: {doc1_text}\nDoc B: {doc2_text}"
+    try: return client.models.generate_content(model=MODEL_ID, contents=prompt).text
+    except Exception as e: return f"Error: {str(e)}"
+
+# --- NEW SIMULATION AGENTS ---
+
+def agent_a_opening(document_text: str, language: str = "English") -> str:
+    if not client: return "Error"
+    prompt = f"You are a fierce, highly competent AI lawyer representing the user. Read the document, find the most unfair or one-sided clause, and write a concise, persuasive 1-paragraph opening argument to the opposing counsel demanding it be changed. Be professional but firm. Respond ENTIRELY in {language}.\n\nDoc: {document_text}"
+    try: return client.models.generate_content(model=MODEL_ID, contents=prompt).text
+    except Exception: return "Agent A encountered an error."
+
+def agent_b_response(document_text: str, agent_a_msg: str, language: str = "English") -> str:
+    if not client: return "Error"
+    prompt = f"You are the opposing counsel defending this document. The other lawyer just said: '{agent_a_msg}'. Write a concise, stubborn 1-paragraph response defending your client's clause, but offer a very slight, sneaky compromise. Be formal. Respond ENTIRELY in {language}."
+    try: return client.models.generate_content(model=MODEL_ID, contents=prompt).text
+    except Exception: return "Agent B encountered an error."
+
+def agent_a_counter(document_text: str, agent_b_msg: str, language: str = "English") -> str:
+    if not client: return "Error"
+    prompt = f"You are a fierce AI lawyer representing the user. The opposing counsel just said: '{agent_b_msg}'. Write a final, aggressive 1-paragraph counter-offer protecting the user. Call out their sneaky compromise. Respond ENTIRELY in {language}."
+    try: return client.models.generate_content(model=MODEL_ID, contents=prompt).text
+    except Exception: return "Agent A encountered an error."
