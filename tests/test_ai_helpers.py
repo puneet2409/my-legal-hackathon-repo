@@ -9,9 +9,6 @@ from utils.ai_helpers import (
     analyze_document_risks,
     ask_question_about_document,
     compare_contracts,
-    agent_a_opening,
-    agent_b_response,
-    agent_a_counter,
     simulate_full_negotiation,
     sanitize_error_message,
     sanitize_prompt_payload,
@@ -88,24 +85,6 @@ def test_compare_contracts(mock_generate):
 
 # --- 4. Autonomous Agent Dialogue Tests ---
 
-@patch("utils.ai_helpers._generate_with_retry")
-def test_agent_a_opening(mock_generate):
-    mock_generate.return_value = "Section 4 imposes unilateral indemnification which is unfair."
-    res = agent_a_opening("Contract text with section 4.", language="English")
-    assert "unilateral indemnification" in res
-
-@patch("utils.ai_helpers._generate_with_retry")
-def test_agent_b_response(mock_generate):
-    mock_generate.return_value = "Our client requires indemnity, but we offer a $10,000 liability cap."
-    res = agent_b_response("Doc text", "Opposing argument", language="English")
-    assert "liability cap" in res
-
-@patch("utils.ai_helpers._generate_with_retry")
-def test_agent_a_counter(mock_generate):
-    mock_generate.return_value = "We accept the cap if mutual 30-day notice is guaranteed."
-    res = agent_a_counter("Doc text", "Compromise offer", language="English")
-    assert "30-day notice" in res
-
 # --- 5. Missing Key Guard Tests ---
 
 @patch.dict(os.environ, {}, clear=True)
@@ -177,9 +156,6 @@ def test_ai_helpers_exception_branches(mock_generate):
     assert "An error occurred during risk analysis" in analyze_document_risks("text")
     assert "An error occurred while answering your question" in ask_question_about_document("text", "q")
     assert "An error occurred during document comparison" in compare_contracts("doc1", "doc2")
-    assert "Agent A encountered an error" in agent_a_opening("text")
-    assert "Agent B encountered an error" in agent_b_response("text", "msg")
-    assert "Agent A encountered an error" in agent_a_counter("text", "msg")
 
 
 def test_sanitize_prompt_payload():

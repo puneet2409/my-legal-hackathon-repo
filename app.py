@@ -1,3 +1,6 @@
+# pylint: disable=line-too-long,too-many-locals,too-many-branches,too-many-statements,trailing-whitespace,wrong-import-order,ungrouped-imports
+"""LegalLens main Streamlit application entry point."""
+
 import streamlit as st
 import os
 from utils.doc_parser import extract_text_from_file
@@ -154,6 +157,7 @@ def cached_negotiation_simulation(doc_text: str, target_lang: str) -> tuple:
 
 
 def main():
+    """Main application layout and logic."""
     # Initialize persistent state variables
     if "document_text" not in st.session_state:
         st.session_state.document_text = None

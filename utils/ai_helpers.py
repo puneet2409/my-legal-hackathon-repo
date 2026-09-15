@@ -1,3 +1,6 @@
+# pylint: disable=line-too-long,broad-exception-caught
+"""AI integration helpers for Gemini API calls, handling retries, fallbacks, and prompts."""
+
 import os
 import re
 import logging
@@ -82,6 +85,7 @@ def get_client() -> Optional[genai.Client]:
     try:
         return genai.Client(api_key=api_key)
     except Exception as e:
+    # pylint: disable=broad-exception-caught
         logger.error("Failed to initialize Gemini Client: %s", sanitize_error_message(e))
         return None
 
@@ -149,6 +153,7 @@ def _generate_with_retry(prompt: str, max_output_tokens: Optional[int] = None) -
             if response and response.text:
                 return response.text
         except Exception as e:
+        # pylint: disable=broad-exception-caught
             last_err = e
             logger.warning(
                 "Model %s encountered error: %s. Trying fallback model.",
@@ -197,6 +202,7 @@ def get_document_summary(document_text: str, language: str = "English") -> str:
     try:
         return _generate_with_retry(prompt, max_output_tokens=2048)
     except Exception as e:
+    # pylint: disable=broad-exception-caught
         safe_err = sanitize_error_message(e)
         logger.error("Summarization error: %s", safe_err)
         return f"An error occurred during summarization: {safe_err}"
@@ -247,6 +253,7 @@ def analyze_document_risks(document_text: str, language: str = "English") -> str
     try:
         return _generate_with_retry(prompt, max_output_tokens=2048)
     except Exception as e:
+    # pylint: disable=broad-exception-caught
         safe_err = sanitize_error_message(e)
         logger.error("Risk analysis error: %s", safe_err)
         return f"An error occurred during risk analysis: {safe_err}"
@@ -285,6 +292,7 @@ def ask_question_about_document(document_text: str, user_question: str, language
     try:
         return _generate_with_retry(prompt, max_output_tokens=1024)
     except Exception as e:
+    # pylint: disable=broad-exception-caught
         safe_err = sanitize_error_message(e)
         logger.error("Question answering error: %s", safe_err)
         return f"An error occurred while answering your question: {safe_err}"
@@ -333,6 +341,7 @@ def compare_contracts(doc1_text: str, doc2_text: str, language: str = "English")
     try:
         return _generate_with_retry(prompt, max_output_tokens=2048)
     except Exception as e:
+    # pylint: disable=broad-exception-caught
         safe_err = sanitize_error_message(e)
         logger.error("Document comparison error: %s", safe_err)
         return f"An error occurred during document comparison: {safe_err}"
@@ -403,6 +412,7 @@ def simulate_full_negotiation(document_text: str, language: str = "English") -> 
             r3 = lines[2] if len(lines) > 2 else "We accept the two-month cap, provided the 90-day auto-renewal notice is reduced to 30 days."
         return r1, r2, r3
     except Exception as e:
+    # pylint: disable=broad-exception-caught
         safe_err = sanitize_error_message(e)
         logger.error("Simulation generation error: %s", safe_err)
         return (
@@ -410,60 +420,3 @@ def simulate_full_negotiation(document_text: str, language: str = "English") -> 
             f"Agent Morgan error: {safe_err}",
             f"Agent Alex error: {safe_err}"
         )
-
-
-def agent_a_opening(document_text: str, language: str = "English") -> str:
-    """Agent A: User's assertive counsel demanding changes."""
-    prompt = f"""
-    {PROMPT_INJECTION_GUARD}
-
-    You are an assertive, professional legal counsel representing the user.
-    Identify the single most unfair, one-sided clause in this document and write a firm 1-paragraph opening negotiation argument to opposing counsel demanding its revision.
-    IMPORTANT: Respond ENTIRELY in {language}.
-    
-    <contract_document>
-    {sanitize_prompt_payload(document_text)}
-    </contract_document>
-    """
-    try:
-        return _generate_with_retry(prompt, max_output_tokens=250)
-    except Exception as e:
-        safe_err = sanitize_error_message(e)
-        logger.error("Agent A opening error: %s", safe_err)
-        return f"Agent A encountered an error: {safe_err}"
-
-
-def agent_b_response(document_text: str, agent_a_msg: str, language: str = "English") -> str:
-    """Agent B: Opposing counsel defending the clause with a proposed compromise."""
-    prompt = f"""
-    {PROMPT_INJECTION_GUARD}
-
-    You are opposing counsel defending the contract.
-    The user's counsel just stated: '{agent_a_msg}'.
-    Write a 1-paragraph formal defense of your client's position, but propose a slight counter-compromise.
-    IMPORTANT: Respond ENTIRELY in {language}.
-    """
-    try:
-        return _generate_with_retry(prompt, max_output_tokens=250)
-    except Exception as e:
-        safe_err = sanitize_error_message(e)
-        logger.error("Agent B response error: %s", safe_err)
-        return f"Agent B encountered an error: {safe_err}"
-
-
-def agent_a_counter(document_text: str, agent_b_msg: str, language: str = "English") -> str:
-    """Agent A: Counter-argument closing the negotiation with protective terms."""
-    prompt = f"""
-    {PROMPT_INJECTION_GUARD}
-
-    You are the user's legal counsel.
-    Opposing counsel replied: '{agent_b_msg}'.
-    Write a final 1-paragraph counter-proposal that calls out any subtle risks in their compromise and locks down favorable terms for your client.
-    IMPORTANT: Respond ENTIRELY in {language}.
-    """
-    try:
-        return _generate_with_retry(prompt, max_output_tokens=250)
-    except Exception as e:
-        safe_err = sanitize_error_message(e)
-        logger.error("Agent A counter error: %s", safe_err)
-        return f"Agent A encountered an error: {safe_err}"

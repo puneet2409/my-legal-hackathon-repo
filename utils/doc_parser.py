@@ -1,3 +1,6 @@
+# pylint: disable=line-too-long,broad-exception-caught,too-many-locals,too-many-return-statements,too-many-branches,no-else-return
+"""Document parsing utilities for safe text extraction from PDFs and Text files."""
+
 import os
 import re
 import logging

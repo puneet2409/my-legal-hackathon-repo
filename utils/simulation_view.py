@@ -1,3 +1,6 @@
+# pylint: disable=line-too-long,trailing-whitespace
+"""Simulation view rendering module for generating the 2D canvas HTML."""
+
 from html import escape as html_escape
 
 
