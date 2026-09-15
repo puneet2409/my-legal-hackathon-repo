@@ -33,6 +33,9 @@ def test_required_files_exist():
     required_files = [
         "app.py",
         "README.md",
+        "SECURITY.md",
+        "ACCESSIBILITY.md",
+        ".github/workflows/ci.yml",
         "requirements.txt",
         "index.html",
         "utils/ai_helpers.py",

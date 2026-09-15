@@ -15,8 +15,11 @@ venv.bak/
 # Streamlit
 .streamlit/
 
-# Testing
+# Testing & Coverage
 .pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
 
 # OS generated files
 .DS_Store

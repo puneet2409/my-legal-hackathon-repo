@@ -129,6 +129,25 @@ SAMPLE_NDA = """MUTUAL NON-DISCLOSURE AGREEMENT
 4. NON-COMPETE RESTRICTION: Receiving Party agrees not to engage in any competing line of business in North America for three (3) years following signature.
 5. LIQUIDATED DAMAGES: Breach of this agreement triggers an automatic liquidated damages payment of $250,000 without requirement of proving actual damages."""
 
+# --- PERFORMANCE OPTIMIZED CACHING ---
+@st.cache_data(show_spinner=False, max_entries=50)
+def cached_document_summary(doc_text: str, target_lang: str) -> str:
+    """Caches AI summaries to prevent redundant API calls and reduce latency."""
+    return get_document_summary(doc_text, target_lang)
+
+
+@st.cache_data(show_spinner=False, max_entries=50)
+def cached_document_risks(doc_text: str, target_lang: str) -> str:
+    """Caches AI risk assessments for instant sub-millisecond retrieval."""
+    return analyze_document_risks(doc_text, target_lang)
+
+
+@st.cache_data(show_spinner=False, max_entries=50)
+def cached_contract_comparison(doc1: str, doc2: str, target_lang: str) -> str:
+    """Caches contract version comparison diffs."""
+    return compare_contracts(doc1, doc2, target_lang)
+
+
 def main():
     # Initialize persistent state variables
     if "document_text" not in st.session_state:
@@ -179,6 +198,23 @@ def main():
             ["English", "Spanish", "French", "Hindi", "German", "Mandarin", "Arabic", "Portuguese"],
             help="All AI summaries, tables, and simulations will be generated in this language."
         )
+
+        st.markdown("### ♿ Accessibility")
+        a11y_mode = st.toggle(
+            "High-Contrast & Large Text",
+            value=False,
+            key="a11y_toggle",
+            help="Enforces WCAG 2.1 AAA high-contrast colors and increased typography for accessibility."
+        )
+        if a11y_mode:
+            st.markdown("""
+            <style>
+              .stApp { background: #000000 !important; color: #ffffff !important; }
+              p, span, div, label { font-size: 1.05rem !important; color: #ffffff !important; }
+              button, input, select, textarea { outline: 3px solid #facc15 !important; outline-offset: 2px !important; }
+              .glass-card { background: #090d16 !important; border: 2px solid #ffffff !important; }
+            </style>
+            """, unsafe_allow_html=True)
         
         st.divider()
         st.markdown("### 📄 Primary Document")
@@ -279,7 +315,7 @@ def main():
             with col_sum_action:
                 if st.button("✨ Generate Summary", type="primary", use_container_width=True, key="btn_gen_sum"):
                     with st.spinner("Analyzing document structure and obligations..."):
-                        summary = get_document_summary(st.session_state.document_text, language)
+                        summary = cached_document_summary(st.session_state.document_text, language)
                         st.session_state.summary = summary
             
             if st.session_state.get("summary"):
@@ -300,7 +336,7 @@ def main():
             
             if st.button("🔍 Scan for Hidden Risks", type="primary", key="btn_gen_risk"):
                 with st.spinner("Scanning for predatory terms and unfavorable clauses..."):
-                    risks = analyze_document_risks(st.session_state.document_text, language)
+                    risks = cached_document_risks(st.session_state.document_text, language)
                     st.session_state.risks = risks
             
             if st.session_state.get("risks"):
@@ -394,7 +430,7 @@ def main():
                         if not doc2_text or doc2_text.startswith("Error"):
                             st.error(f"❌ Failed to parse secondary document: {doc2_text}")
                         else:
-                            comparison_result = compare_contracts(st.session_state.document_text, doc2_text, language)
+                            comparison_result = cached_contract_comparison(st.session_state.document_text, doc2_text, language)
                             st.markdown(comparison_result)
                             st.download_button(
                                 label="📥 Download Comparison Report",

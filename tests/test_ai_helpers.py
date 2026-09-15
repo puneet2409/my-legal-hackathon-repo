@@ -104,3 +104,51 @@ def test_missing_key_guards():
     assert "API key not configured" in analyze_document_risks("text", "English")
     assert "API key not configured" in ask_question_about_document("text", "q", "English")
     assert "API key not configured" in compare_contracts("d1", "d2", "English")
+
+
+# --- 6. Model Fallback and Exception Recovery Tests ---
+
+@patch("utils.ai_helpers.get_client")
+def test_generate_with_retry_model_fallback(mock_get_client):
+    mock_client = MagicMock()
+    # First model raises error, second model returns response
+    first_resp = MagicMock(side_effect=Exception("503 Service Unavailable"))
+    second_resp = MagicMock(text="Successful fallback response")
+
+    def side_effect(model, contents):
+        if model == MODELS[0]:
+            raise Exception("503 Unavailable")
+        resp = MagicMock()
+        resp.text = "Fallback model success"
+        return resp
+
+    mock_client.models.generate_content.side_effect = side_effect
+    mock_get_client.return_value = mock_client
+
+    result = _generate_with_retry("Test prompt")
+    assert result == "Fallback model success"
+
+
+@patch("utils.ai_helpers.get_client")
+def test_generate_with_retry_all_fail(mock_get_client):
+    mock_client = MagicMock()
+    mock_client.models.generate_content.side_effect = Exception("400 Fatal Error")
+    mock_get_client.return_value = mock_client
+
+    with pytest.raises(Exception) as excinfo:
+        _generate_with_retry("Fatal prompt")
+    assert "400 Fatal Error" in str(excinfo.value)
+
+
+@patch("utils.ai_helpers._generate_with_retry")
+@patch.dict(os.environ, {"GEMINI_API_KEY": "fake_key"})
+def test_ai_helpers_exception_branches(mock_generate):
+    mock_generate.side_effect = Exception("Network connection timeout")
+
+    assert "An error occurred during summarization" in get_document_summary("text")
+    assert "An error occurred during risk analysis" in analyze_document_risks("text")
+    assert "An error occurred while answering your question" in ask_question_about_document("text", "q")
+    assert "An error occurred during document comparison" in compare_contracts("doc1", "doc2")
+    assert "Agent A encountered an error" in agent_a_opening("text")
+    assert "Agent B encountered an error" in agent_b_response("text", "msg")
+    assert "Agent A encountered an error" in agent_a_counter("text", "msg")

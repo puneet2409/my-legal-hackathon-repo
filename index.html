@@ -129,17 +129,17 @@
     <section class="lg:col-span-8 flex flex-col gap-4">
       
       <!-- Tab Navigation -->
-      <div class="flex border-b border-slate-800 text-xs font-medium gap-6 overflow-x-auto">
-        <button onclick="switchTab('tab-summary')" id="btn-tab-summary" class="pb-2.5 tab-active flex items-center gap-1.5 whitespace-nowrap">
+      <div role="tablist" aria-label="Analysis Mode Tabs" class="flex border-b border-slate-800 text-xs font-medium gap-6 overflow-x-auto">
+        <button role="tab" aria-selected="true" aria-controls="tab-summary" onclick="switchTab('tab-summary')" id="btn-tab-summary" class="pb-2.5 tab-active flex items-center gap-1.5 whitespace-nowrap">
           <span>📝</span> Plain Summary
         </button>
-        <button onclick="switchTab('tab-risks')" id="btn-tab-risks" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
+        <button role="tab" aria-selected="false" aria-controls="tab-risks" onclick="switchTab('tab-risks')" id="btn-tab-risks" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
           <span>🚨</span> Risk Matrix
         </button>
-        <button onclick="switchTab('tab-sim')" id="btn-tab-sim" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
+        <button role="tab" aria-selected="false" aria-controls="tab-sim" onclick="switchTab('tab-sim')" id="btn-tab-sim" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
           <span>🎭</span> 2D Smallville Simulation
         </button>
-        <button onclick="switchTab('tab-chat')" id="btn-tab-chat" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
+        <button role="tab" aria-selected="false" aria-controls="tab-chat" onclick="switchTab('tab-chat')" id="btn-tab-chat" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
           <span>💬</span> Grounded Q&A
         </button>
       </div>
@@ -343,8 +343,10 @@
         const btn = document.getElementById('btn-' + id);
         if (id === tabId) {
           btn.className = 'pb-2.5 tab-active flex items-center gap-1.5 whitespace-nowrap';
+          btn.setAttribute('aria-selected', 'true');
         } else {
           btn.className = 'pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap';
+          btn.setAttribute('aria-selected', 'false');
         }
       });
     }

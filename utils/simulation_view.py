@@ -1,4 +1,7 @@
 import json
+from html import escape as html_escape
+from typing import Optional
+
 
 def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -> str:
     """
@@ -6,16 +9,26 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
     - Overview map with law firm rooms, pathways, and green courtyards.
     - Floating Picture-in-Picture Callout Cards with leader lines and pins.
     - Close-up room scenes showing pixel characters with speech bubbles and dialogue scripts.
+    - Full XSS protection using HTML escaping on dialogue strings.
+    - Semantic ARIA attributes for screen reader accessibility.
+
+    Args:
+        msg1: Opening argument from user's counsel (Alex).
+        msg2: Defense and compromise proposal from opposing counsel (Morgan).
+        msg3: Final counter-proposal from user's counsel.
+
+    Returns:
+        str: Self-contained, accessible HTML5 document for embedding.
     """
-    clean_msg1 = (msg1.strip() if msg1 else "Section 4.2 imposes unlimited unilateral liability on the user. We demand mutual indemnification or a $5,000 liability cap.")
-    clean_msg2 = (msg2.strip() if msg2 else "Our client requires indemnity protection for operational disputes, but we can agree to cap liability at two months of service fees.")
-    clean_msg3 = (msg3.strip() if msg3 else "We accept the two-month fee cap, provided that the 90-day auto-renewal notice period is reduced to 30 days.")
+    clean_msg1 = html_escape(msg1.strip() if msg1 else "Section 4.2 imposes unlimited unilateral liability on the user. We demand mutual indemnification or a $5,000 liability cap.")
+    clean_msg2 = html_escape(msg2.strip() if msg2 else "Our client requires indemnity protection for operational disputes, but we can agree to cap liability at two months of service fees.")
+    clean_msg3 = html_escape(msg3.strip() if msg3 else "We accept the two-month fee cap, provided that the 90-day auto-renewal notice period is reduced to 30 days.")
 
     safe_msg1 = json.dumps(clean_msg1)
     safe_msg2 = json.dumps(clean_msg2)
     safe_msg3 = json.dumps(clean_msg3)
 
-    html = f"""
+    html_doc = f"""
     <!DOCTYPE html>
     <html>
     <head>
@@ -134,12 +147,12 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
       </style>
     </head>
     <body>
-      <div id="canvas-stage">
+      <div id="canvas-stage" role="region" aria-label="Interactive 2D Legal Negotiation Simulation">
         <!-- Base Map -->
-        <canvas id="mapCanvas" width="900" height="560"></canvas>
+        <canvas id="mapCanvas" width="900" height="560" role="img" aria-label="Overview map of law firm campus and negotiation suites"></canvas>
 
         <!-- Leader Lines -->
-        <svg id="leaderSvg">
+        <svg id="leaderSvg" aria-hidden="true">
           <!-- Library leader line -->
           <line x1="150" y1="185" x2="220" y2="280" stroke="#60a5fa" stroke-width="2.5" stroke-dasharray="4,4" />
           <circle cx="220" cy="280" r="5" fill="#3b82f6" stroke="#ffffff" stroke-width="2" />
@@ -154,28 +167,28 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
         </svg>
 
         <!-- CARD 1: Law Library -->
-        <div class="callout-card" id="card-library">
+        <div class="callout-card" id="card-library" role="article" aria-label="Alex Law Library Research Card">
           <div class="card-header">Researching in Law Library</div>
-          <canvas class="card-viewport" id="vpLibrary" width="250" height="70"></canvas>
+          <canvas class="card-viewport" id="vpLibrary" width="250" height="70" role="img" aria-label="Pixel avatar Alex researching books"></canvas>
           <div class="card-dialogue">
             <strong style="color: #0369a1;">[Alex]:</strong> Analyzing contract liabilities against consumer protection & Fair Contract Standards...
           </div>
         </div>
 
         <!-- CARD 2: Opposing Chambers -->
-        <div class="callout-card" id="card-opposing">
+        <div class="callout-card" id="card-opposing" role="article" aria-label="Morgan Opposing Chambers Card">
           <div class="card-header">Opposing Counsel Chambers</div>
-          <canvas class="card-viewport" id="vpOpposing" width="250" height="70"></canvas>
+          <canvas class="card-viewport" id="vpOpposing" width="250" height="70" role="img" aria-label="Pixel avatar Morgan preparing defense"></canvas>
           <div class="card-dialogue">
             <strong style="color: #b91c1c;">[Morgan]:</strong> Preparing defense arguments and evaluating client's liability exposure...
           </div>
         </div>
 
         <!-- CARD 3: Negotiation at Conference Table -->
-        <div class="callout-card" id="card-negotiation">
+        <div class="callout-card" id="card-negotiation" role="region" aria-label="Active Negotiation Dialogue Card">
           <div class="card-header">Active Negotiation at Settlement Table</div>
-          <canvas class="card-viewport" id="vpConference" width="580" height="70"></canvas>
-          <div class="card-dialogue" id="live-nego-text">
+          <canvas class="card-viewport" id="vpConference" width="580" height="70" role="img" aria-label="Pixel avatars Alex and Morgan negotiating at settlement table"></canvas>
+          <div class="card-dialogue" id="live-nego-text" role="log" aria-live="polite">
             <div style="margin-bottom: 6px;"><strong style="color: #0369a1;">[Alex - Your Counsel]:</strong> {clean_msg1}</div>
             <div style="margin-bottom: 6px;"><strong style="color: #b91c1c;">[Morgan - Opposing]:</strong> {clean_msg2}</div>
             <div><strong style="color: #15803d;">[Alex - Counter-Offer]:</strong> {clean_msg3}</div>
@@ -405,4 +418,4 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
     </body>
     </html>
     """
-    return html
+    return html_doc
