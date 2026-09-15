@@ -7,9 +7,9 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
     - Floating Picture-in-Picture Callout Cards with leader lines and pins.
     - Close-up room scenes showing pixel characters with speech bubbles and dialogue scripts.
     """
-    clean_msg1 = (msg1[:240] if msg1 else "Section 4.2 imposes unlimited unilateral liability on the user. We demand mutual indemnification or a $5,000 liability cap.")
-    clean_msg2 = (msg2[:240] if msg2 else "Our client requires indemnity protection for operational disputes, but we can agree to cap liability at two months of service fees.")
-    clean_msg3 = (msg3[:240] if msg3 else "We accept the two-month fee cap, provided that the 90-day auto-renewal notice period is reduced to 30 days.")
+    clean_msg1 = (msg1.strip() if msg1 else "Section 4.2 imposes unlimited unilateral liability on the user. We demand mutual indemnification or a $5,000 liability cap.")
+    clean_msg2 = (msg2.strip() if msg2 else "Our client requires indemnity protection for operational disputes, but we can agree to cap liability at two months of service fees.")
+    clean_msg3 = (msg3.strip() if msg3 else "We accept the two-month fee cap, provided that the 90-day auto-renewal notice period is reduced to 30 days.")
 
     safe_msg1 = json.dumps(clean_msg1)
     safe_msg2 = json.dumps(clean_msg2)
@@ -25,7 +25,7 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
         body {{
           background: #0f172a;
           color: #f8fafc;
-          padding: 10px;
+          padding: 8px;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -33,7 +33,7 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
         #canvas-stage {{
           position: relative;
           width: 900px;
-          height: 560px;
+          height: 600px;
           background: #86efac; /* Smallville-style grass green */
           border-radius: 12px;
           overflow: hidden;
@@ -45,7 +45,7 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
         #mapCanvas {{
           position: absolute;
           top: 0; left: 0;
-          width: 900px; height: 560px;
+          width: 900px; height: 600px;
           image-rendering: pixelated;
         }}
 
@@ -53,7 +53,7 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
         #leaderSvg {{
           position: absolute;
           top: 0; left: 0;
-          width: 900px; height: 560px;
+          width: 900px; height: 600px;
           pointer-events: none;
           z-index: 10;
         }}
@@ -80,7 +80,7 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
         }}
         .card-viewport {{
           width: 100%;
-          height: 75px;
+          height: 70px;
           background: #1e293b;
           position: relative;
           border-bottom: 2px solid #334155;
@@ -89,26 +89,33 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
         .card-dialogue {{
           background: #ffffff;
           color: #0f172a;
-          padding: 6px 10px;
-          font-family: "Courier New", monospace;
-          font-size: 10.5px;
-          line-height: 1.35;
-          max-height: 75px;
+          padding: 8px 12px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          font-size: 11px;
+          line-height: 1.45;
+          max-height: 130px;
           overflow-y: auto;
+        }}
+        .card-dialogue::-webkit-scrollbar {{
+          width: 5px;
+        }}
+        .card-dialogue::-webkit-scrollbar-thumb {{
+          background: #94a3b8;
+          border-radius: 3px;
         }}
 
         /* Specific Card Positions */
         #card-library {{
-          top: 25px; left: 25px;
+          top: 20px; left: 20px;
           width: 250px;
         }}
         #card-opposing {{
-          top: 25px; right: 25px;
+          top: 20px; right: 20px;
           width: 250px;
         }}
         #card-negotiation {{
-          bottom: 20px; left: 210px;
-          width: 480px;
+          bottom: 16px; left: 160px;
+          width: 580px;
         }}
 
         /* Pixel Speech Bubble */
@@ -142,36 +149,36 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
           <circle cx="680" cy="280" r="5" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
 
           <!-- Negotiation table leader line -->
-          <line x1="450" y1="410" x2="450" y2="300" stroke="#facc15" stroke-width="2.5" stroke-dasharray="4,4" />
+          <line x1="450" y1="440" x2="450" y2="300" stroke="#facc15" stroke-width="2.5" stroke-dasharray="4,4" />
           <circle cx="450" cy="300" r="6" fill="#eab308" stroke="#ffffff" stroke-width="2" />
         </svg>
 
         <!-- CARD 1: Law Library -->
         <div class="callout-card" id="card-library">
           <div class="card-header">Researching in Law Library</div>
-          <canvas class="card-viewport" id="vpLibrary" width="250" height="75"></canvas>
+          <canvas class="card-viewport" id="vpLibrary" width="250" height="70"></canvas>
           <div class="card-dialogue">
-            <strong>[Alex]:</strong> Reviewing Section 4.2 liabilities against Fair Contract Standards...
+            <strong style="color: #0369a1;">[Alex]:</strong> Analyzing contract liabilities against consumer protection & Fair Contract Standards...
           </div>
         </div>
 
         <!-- CARD 2: Opposing Chambers -->
         <div class="callout-card" id="card-opposing">
           <div class="card-header">Opposing Counsel Chambers</div>
-          <canvas class="card-viewport" id="vpOpposing" width="250" height="75"></canvas>
+          <canvas class="card-viewport" id="vpOpposing" width="250" height="70"></canvas>
           <div class="card-dialogue">
-            <strong>[Morgan]:</strong> Preparing indemnity arguments and consulting operational risks...
+            <strong style="color: #b91c1c;">[Morgan]:</strong> Preparing defense arguments and evaluating client's liability exposure...
           </div>
         </div>
 
         <!-- CARD 3: Negotiation at Conference Table -->
         <div class="callout-card" id="card-negotiation">
           <div class="card-header">Active Negotiation at Settlement Table</div>
-          <canvas class="card-viewport" id="vpConference" width="480" height="85"></canvas>
+          <canvas class="card-viewport" id="vpConference" width="580" height="70"></canvas>
           <div class="card-dialogue" id="live-nego-text">
-            <strong>[Alex]:</strong> {clean_msg1}<br>
-            <strong>[Morgan]:</strong> {clean_msg2}<br>
-            <strong>[Alex]:</strong> {clean_msg3}
+            <div style="margin-bottom: 6px;"><strong style="color: #0369a1;">[Alex - Your Counsel]:</strong> {clean_msg1}</div>
+            <div style="margin-bottom: 6px;"><strong style="color: #b91c1c;">[Morgan - Opposing]:</strong> {clean_msg2}</div>
+            <div><strong style="color: #15803d;">[Alex - Counter-Offer]:</strong> {clean_msg3}</div>
           </div>
         </div>
       </div>
@@ -185,7 +192,7 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
         function drawOverviewMap() {{
           // Green Field Background
           mctx.fillStyle = "#86efac";
-          mctx.fillRect(0, 0, 900, 560);
+          mctx.fillRect(0, 0, 900, 600);
 
           // Path / Dirt Road
           mctx.fillStyle = "#fde047";

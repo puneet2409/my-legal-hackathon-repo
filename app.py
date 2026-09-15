@@ -340,7 +340,7 @@ def main():
                         st.session_state.sim_msg2,
                         st.session_state.sim_msg3
                     ),
-                    height=600
+                    height=640
                 )
                 
                 # Full negotiation transcript
@@ -350,7 +350,7 @@ def main():
                     st.markdown(f"**🧑‍⚖️ Alex (Final Protective Terms):**\n\n{st.session_state.sim_msg3}")
             else:
                 # Default live 2D canvas view
-                components.html(get_office_simulation_html(), height=600)
+                components.html(get_office_simulation_html(), height=640)
                 st.info("Click **'▶️ Launch 2D Agent Simulation'** above to generate arguments based on your uploaded document and watch the agents navigate and negotiate live on the map!")
 
         # --- TAB 4: CHAT Q&A ---
