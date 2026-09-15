@@ -5,8 +5,8 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.38.0-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-Flash--Lite-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com/)
-[![Tests](https://img.shields.io/badge/Pytest-10%20Passed%20(100%25)-success?style=for-the-badge&logo=pytest&logoColor=white)](tests/test_app.py)
-[![Repo Size](https://img.shields.io/badge/Repo%20Size-%3C%20100%20KB%20(Rule%20Passed)-blueviolet?style=for-the-badge)](#-rules-compliance)
+[![Tests](https://img.shields.io/badge/Pytest-38%20Passed%20(100%25)-success?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![Repo Size](https://img.shields.io/badge/Repo%20Size-%3C%20130%20KB%20(Rule%20Passed)-blueviolet?style=for-the-badge)](#-rules-compliance)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge)](LICENSE)
 
 <p align="center">
@@ -101,34 +101,62 @@ streamlit run app.py
 
 ## 🧪 Automated Testing
 
-LegalLens includes an automated unit testing suite with **10 comprehensive tests** validating text parsing, UTF-8/Latin-1 encodings, error classification, and mocked AI responses.
+LegalLens includes an extensive, enterprise-grade automated testing suite with **38 comprehensive unit and compliance tests** validating text parsing, UTF-8/Latin-1 encodings, error classification, mocked AI agent dialogues, Smallville canvas generation, and Hack2Skill competition rules.
 
 Run tests anytime:
 ```bash
 python -m pytest tests/ -v
 ```
 
-<details>
-<summary><b>🔍 View Test Suite Execution Output (10/10 Passed)</b></summary>
+<details open>
+<summary><b>🔍 View Test Suite Execution Output (38/38 Passed in 0.45s)</b></summary>
 
 ```text
 ============================= test session starts =============================
 platform win32 -- Python 3.12.10, pytest-8.3.3
 rootdir: D:\my-legal-hackathon-repo
-collected 10 items
+collected 38 items
 
-tests/test_app.py::test_extract_text_from_txt_utf8 PASSED                [ 10%]
-tests/test_app.py::test_extract_text_from_txt_latin1 PASSED              [ 20%]
-tests/test_app.py::test_extract_text_unsupported_format PASSED           [ 30%]
-tests/test_app.py::test_extract_text_none_input PASSED                   [ 40%]
-tests/test_app.py::test_extract_text_empty_file PASSED                   [ 50%]
-tests/test_app.py::test_is_transient_error PASSED                        [ 60%]
-tests/test_app.py::test_get_document_summary_success PASSED              [ 70%]
-tests/test_app.py::test_analyze_document_risks_success PASSED            [ 80%]
-tests/test_app.py::test_compare_contracts_success PASSED                 [ 90%]
-tests/test_app.py::test_ai_helpers_missing_key PASSED                    [100%]
+tests/test_ai_helpers.py::test_transient_error_detection PASSED          [  2%]
+tests/test_ai_helpers.py::test_get_client_missing_key PASSED             [  5%]
+tests/test_ai_helpers.py::test_get_client_with_key PASSED                [  7%]
+tests/test_ai_helpers.py::test_summary_multilingual PASSED               [ 10%]
+tests/test_ai_helpers.py::test_risk_analysis_output PASSED               [ 13%]
+tests/test_ai_helpers.py::test_chat_grounded_qa PASSED                   [ 15%]
+tests/test_ai_helpers.py::test_compare_contracts PASSED                  [ 18%]
+tests/test_ai_helpers.py::test_agent_a_opening PASSED                    [ 21%]
+tests/test_ai_helpers.py::test_agent_b_response PASSED                   [ 23%]
+tests/test_ai_helpers.py::test_agent_a_counter PASSED                    [ 26%]
+tests/test_ai_helpers.py::test_missing_key_guards PASSED                 [ 28%]
+tests/test_app.py::test_extract_text_from_txt_utf8 PASSED                [ 31%]
+tests/test_app.py::test_extract_text_from_txt_latin1 PASSED              [ 34%]
+tests/test_app.py::test_extract_text_unsupported_format PASSED           [ 36%]
+tests/test_app.py::test_extract_text_none_input PASSED                   [ 39%]
+tests/test_app.py::test_extract_text_empty_file PASSED                   [ 42%]
+tests/test_app.py::test_is_transient_error PASSED                        [ 44%]
+tests/test_app.py::test_get_document_summary_success PASSED              [ 47%]
+tests/test_app.py::test_analyze_document_risks_success PASSED            [ 50%]
+tests/test_app.py::test_compare_contracts_success PASSED                 [ 52%]
+tests/test_app.py::test_ai_helpers_missing_key PASSED                    [ 55%]
+tests/test_compliance.py::test_rule_repo_size_under_10mb PASSED          [ 57%]
+tests/test_compliance.py::test_security_gitignore_protects_env PASSED    [ 60%]
+tests/test_compliance.py::test_required_files_exist PASSED               [ 63%]
+tests/test_compliance.py::test_app_syntax_compilation PASSED             [ 65%]
+tests/test_doc_parser.py::test_extract_txt_utf8 PASSED                   [ 68%]
+tests/test_doc_parser.py::test_extract_txt_latin1 PASSED                 [ 71%]
+tests/test_doc_parser.py::test_extract_none PASSED                       [ 73%]
+tests/test_doc_parser.py::test_extract_empty_name PASSED                 [ 76%]
+tests/test_doc_parser.py::test_extract_unsupported_format PASSED         [ 78%]
+tests/test_doc_parser.py::test_extract_pdf_success PASSED                [ 81%]
+tests/test_doc_parser.py::test_extract_pdf_zero_pages PASSED             [ 84%]
+tests/test_doc_parser.py::test_extract_pdf_truncation_guard PASSED       [ 86%]
+tests/test_doc_parser.py::test_extract_pdf_exception_handling PASSED     [ 89%]
+tests/test_simulation.py::test_simulation_html_default PASSED            [ 92%]
+tests/test_simulation.py::test_simulation_html_no_truncation PASSED      [ 94%]
+tests/test_simulation.py::test_simulation_special_characters_escaping PASSED [ 97%]
+tests/test_simulation.py::test_simulation_viewport_dimensions PASSED     [100%]
 
-============================= 10 passed in 0.39s ==============================
+============================= 38 passed in 0.45s ==============================
 ```
 </details>
 

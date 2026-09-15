@@ -14,8 +14,10 @@ def get_client() -> genai.Client:
     Returns an initialized Gemini Client using the GEMINI_API_KEY environment variable.
     Refreshes the key if .env was modified.
     """
-    load_dotenv(override=True)
     api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        load_dotenv()
+        api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         return None
     try:
