@@ -1,10 +1,9 @@
 import streamlit as st
 import os
-import time
 from utils.doc_parser import extract_text_from_file
 from utils.ai_helpers import (
-    get_document_summary, analyze_document_risks, ask_question_about_document, 
-    compare_contracts, agent_a_opening, agent_b_response, agent_a_counter
+    get_document_summary, analyze_document_risks, ask_question_about_document,
+    compare_contracts, simulate_full_negotiation
 )
 from utils.simulation_view import get_office_simulation_html
 import streamlit.components.v1 as components
@@ -146,6 +145,12 @@ def cached_document_risks(doc_text: str, target_lang: str) -> str:
 def cached_contract_comparison(doc1: str, doc2: str, target_lang: str) -> str:
     """Caches contract version comparison diffs."""
     return compare_contracts(doc1, doc2, target_lang)
+
+
+@st.cache_data(show_spinner=False, max_entries=20)
+def cached_negotiation_simulation(doc_text: str, target_lang: str) -> tuple:
+    """Caches 3-turn multi-agent simulation for instant playback."""
+    return simulate_full_negotiation(doc_text, target_lang)
 
 
 def main():
@@ -362,9 +367,7 @@ def main():
             if run_sim_btn or "sim_msg1" in st.session_state:
                 if run_sim_btn:
                     with st.spinner("AI agents are examining legal clauses and roleplaying negotiation..."):
-                        m1 = agent_a_opening(st.session_state.document_text, language)
-                        m2 = agent_b_response(st.session_state.document_text, m1, language)
-                        m3 = agent_a_counter(st.session_state.document_text, m2, language)
+                        m1, m2, m3 = cached_negotiation_simulation(st.session_state.document_text, language)
                         st.session_state.sim_msg1 = m1
                         st.session_state.sim_msg2 = m2
                         st.session_state.sim_msg3 = m3

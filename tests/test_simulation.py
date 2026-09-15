@@ -1,5 +1,5 @@
-import pytest
 from utils.simulation_view import get_office_simulation_html
+
 
 def test_simulation_html_default():
     html = get_office_simulation_html()

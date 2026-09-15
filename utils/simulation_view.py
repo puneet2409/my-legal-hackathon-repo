@@ -1,6 +1,4 @@
-import json
 from html import escape as html_escape
-from typing import Optional
 
 
 def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -> str:
@@ -23,10 +21,6 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
     clean_msg1 = html_escape(msg1.strip() if msg1 else "Section 4.2 imposes unlimited unilateral liability on the user. We demand mutual indemnification or a $5,000 liability cap.")
     clean_msg2 = html_escape(msg2.strip() if msg2 else "Our client requires indemnity protection for operational disputes, but we can agree to cap liability at two months of service fees.")
     clean_msg3 = html_escape(msg3.strip() if msg3 else "We accept the two-month fee cap, provided that the 90-day auto-renewal notice period is reduced to 30 days.")
-
-    safe_msg1 = json.dumps(clean_msg1)
-    safe_msg2 = json.dumps(clean_msg2)
-    safe_msg3 = json.dumps(clean_msg3)
 
     html_doc = f"""
     <!DOCTYPE html>

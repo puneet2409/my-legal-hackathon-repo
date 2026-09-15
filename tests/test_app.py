@@ -1,12 +1,9 @@
-import pytest
-from unittest.mock import MagicMock, patch
-import io
+from unittest.mock import patch
 from utils.doc_parser import extract_text_from_file
 from utils.ai_helpers import (
     is_transient_error,
     get_document_summary,
     analyze_document_risks,
-    ask_question_about_document,
     compare_contracts
 )
 

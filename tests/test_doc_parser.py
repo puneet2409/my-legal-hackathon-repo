@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import MagicMock, patch
 from utils.doc_parser import extract_text_from_file, MAX_PAGES
 

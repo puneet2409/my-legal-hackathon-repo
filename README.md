@@ -6,7 +6,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.38.0-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-Flash--Lite-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com/)
 [![CI](https://img.shields.io/badge/CI%2FCD-Passing-brightgreen?style=for-the-badge&logo=github-actions&logoColor=white)](.github/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Pytest-51%20Passed%20(95%25%20Coverage)-success?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-60%20Passed%20(97%25%20Coverage)-success?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 [![Security](https://img.shields.io/badge/Security-Hardened%20Policy-blue?style=for-the-badge&logo=shield&logoColor=white)](SECURITY.md)
 [![Accessibility](https://img.shields.io/badge/WCAG%202.1-AAA%20Audited-green?style=for-the-badge&logo=w3c&logoColor=white)](ACCESSIBILITY.md)
 [![Repo Size](https://img.shields.io/badge/Repo%20Size-%3C%20250%20KB%20(Rule%20Passed)-blueviolet?style=for-the-badge)](#-rules-compliance)
@@ -103,7 +103,7 @@ streamlit run app.py
 
 ## 🧪 Automated Testing
 
-LegalLens includes an extensive, enterprise-grade automated testing suite with **51 comprehensive unit, security, accessibility, and compliance tests** with **95% code coverage** validating text parsing, UTF-8/Latin-1 encodings, error classification, prompt injection defenses, Smallville canvas generation, and Hack2Skill competition rules.
+LegalLens includes an extensive, enterprise-grade automated testing suite with **60 comprehensive unit, security, accessibility, and compliance tests** with **97% code coverage** validating text parsing, UTF-8/Latin-1 encodings, error classification, prompt injection defenses, Smallville canvas generation, and Hack2Skill competition rules.
 
 Run tests anytime:
 ```bash
@@ -111,62 +111,71 @@ python -m pytest tests/ -v --cov=utils
 ```
 
 <details open>
-<summary><b>🔍 View Test Suite Execution Output (51/51 Passed with 95% Coverage)</b></summary>
+<summary><b>🔍 View Test Suite Execution Output (60/60 Passed with 97% Coverage)</b></summary>
 
 ```text
 ============================= test session starts =============================
 platform win32 -- Python 3.12.10, pytest-8.3.3, pluggy-1.6.0
 rootdir: D:\my-legal-hackathon-repo
-collected 51 items
+collected 60 items
 
 tests/test_ai_helpers.py::test_transient_error_detection PASSED          [  1%]
 tests/test_ai_helpers.py::test_get_client_missing_key PASSED             [  3%]
 tests/test_ai_helpers.py::test_get_client_with_key PASSED                [  5%]
-tests/test_ai_helpers.py::test_summary_multilingual PASSED               [  7%]
-tests/test_ai_helpers.py::test_risk_analysis_output PASSED               [  9%]
+tests/test_ai_helpers.py::test_get_client_exception PASSED               [  6%]
+tests/test_ai_helpers.py::test_summary_multilingual PASSED               [  8%]
+tests/test_ai_helpers.py::test_risk_analysis_output PASSED               [ 10%]
 tests/test_ai_helpers.py::test_chat_grounded_qa PASSED                   [ 11%]
 tests/test_ai_helpers.py::test_compare_contracts PASSED                  [ 13%]
 tests/test_ai_helpers.py::test_agent_a_opening PASSED                    [ 15%]
-tests/test_ai_helpers.py::test_agent_b_response PASSED                   [ 17%]
-tests/test_ai_helpers.py::test_agent_a_counter PASSED                    [ 19%]
-tests/test_ai_helpers.py::test_missing_key_guards PASSED                 [ 21%]
-tests/test_ai_helpers.py::test_generate_with_retry_model_fallback PASSED [ 23%]
-tests/test_ai_helpers.py::test_generate_with_retry_all_fail PASSED       [ 25%]
-tests/test_ai_helpers.py::test_ai_helpers_exception_branches PASSED      [ 27%]
-tests/test_app.py::test_extract_text_from_txt_utf8 PASSED                [ 29%]
-tests/test_app.py::test_extract_text_from_txt_latin1 PASSED              [ 31%]
-tests/test_app.py::test_extract_text_unsupported_format PASSED           [ 33%]
-tests/test_app.py::test_extract_text_none_input PASSED                   [ 35%]
-tests/test_app.py::test_extract_text_empty_file PASSED                   [ 37%]
-tests/test_app.py::test_is_transient_error PASSED                        [ 39%]
-tests/test_app.py::test_get_document_summary_success PASSED              [ 41%]
-tests/test_app.py::test_analyze_document_risks_success PASSED            [ 43%]
-tests/test_app.py::test_compare_contracts_success PASSED                 [ 45%]
-tests/test_app.py::test_ai_helpers_missing_key PASSED                    [ 47%]
-tests/test_compliance.py::test_rule_repo_size_under_10mb PASSED          [ 49%]
-tests/test_compliance.py::test_security_gitignore_protects_env PASSED    [ 50%]
-tests/test_compliance.py::test_required_files_exist PASSED               [ 52%]
-tests/test_compliance.py::test_app_syntax_compilation PASSED             [ 54%]
-tests/test_doc_parser.py::test_extract_txt_utf8 PASSED                   [ 56%]
-tests/test_doc_parser.py::test_extract_txt_latin1 PASSED                 [ 58%]
-tests/test_doc_parser.py::test_extract_none PASSED                       [ 60%]
-tests/test_doc_parser.py::test_extract_empty_name PASSED                 [ 62%]
-tests/test_doc_parser.py::test_extract_unsupported_format PASSED         [ 64%]
-tests/test_doc_parser.py::test_extract_pdf_success PASSED                [ 66%]
-tests/test_doc_parser.py::test_extract_pdf_zero_pages PASSED             [ 68%]
-tests/test_doc_parser.py::test_extract_pdf_truncation_guard PASSED       [ 70%]
-tests/test_doc_parser.py::test_extract_pdf_exception_handling PASSED     [ 72%]
-tests/test_security_a11y.py::test_sanitize_filename_unix_traversal PASSED [ 74%]
-tests/test_security_a11y.py::test_sanitize_filename_windows_traversal PASSED [ 76%]
-tests/test_security_a11y.py::test_sanitize_filename_empty_and_special PASSED [ 78%]
-tests/test_security_a11y.py::test_file_size_exceeded_guard_txt PASSED    [ 80%]
-tests/test_security_a11y.py::test_null_byte_sanitization PASSED          [ 82%]
-tests/test_security_a11y.py::test_prompt_injection_guard_isolation PASSED [ 84%]
-tests/test_security_a11y.py::test_xss_escaping_in_simulation PASSED      [ 86%]
-tests/test_security_a11y.py::test_simulation_aria_accessibility_landmarks PASSED [ 88%]
-tests/test_security_a11y.py::test_models_fast_fallback_priority PASSED   [ 90%]
-tests/test_security_a11y.py::test_simulation_generation_latency PASSED   [ 92%]
-tests/test_simulation.py::test_simulation_html_default PASSED            [ 94%]
+tests/test_ai_helpers.py::test_agent_b_response PASSED                   [ 16%]
+tests/test_ai_helpers.py::test_agent_a_counter PASSED                    [ 18%]
+tests/test_ai_helpers.py::test_missing_key_guards PASSED                 [ 20%]
+tests/test_ai_helpers.py::test_generate_with_retry_model_fallback PASSED [ 21%]
+tests/test_ai_helpers.py::test_generate_with_retry_all_fail PASSED       [ 23%]
+tests/test_ai_helpers.py::test_generate_with_retry_no_client PASSED      [ 25%]
+tests/test_ai_helpers.py::test_generate_with_retry_with_config PASSED    [ 26%]
+tests/test_ai_helpers.py::test_ai_helpers_exception_branches PASSED      [ 28%]
+tests/test_ai_helpers.py::test_sanitize_prompt_payload PASSED            [ 30%]
+tests/test_ai_helpers.py::test_sanitize_error_message PASSED             [ 31%]
+tests/test_ai_helpers.py::test_simulate_full_negotiation_missing_key PASSED [ 33%]
+tests/test_ai_helpers.py::test_simulate_full_negotiation_with_delimiters PASSED [ 35%]
+tests/test_ai_helpers.py::test_simulate_full_negotiation_fallback_lines PASSED [ 36%]
+tests/test_ai_helpers.py::test_simulate_full_negotiation_exception PASSED [ 38%]
+tests/test_app.py::test_extract_text_from_txt_utf8 PASSED                [ 40%]
+tests/test_app.py::test_extract_text_from_txt_latin1 PASSED              [ 41%]
+tests/test_app.py::test_extract_text_unsupported_format PASSED           [ 43%]
+tests/test_app.py::test_extract_text_none_input PASSED                   [ 45%]
+tests/test_app.py::test_extract_text_empty_file PASSED                   [ 46%]
+tests/test_app.py::test_is_transient_error PASSED                        [ 48%]
+tests/test_app.py::test_get_document_summary_success PASSED              [ 50%]
+tests/test_app.py::test_analyze_document_risks_success PASSED            [ 51%]
+tests/test_app.py::test_compare_contracts_success PASSED                 [ 53%]
+tests/test_app.py::test_ai_helpers_missing_key PASSED                    [ 55%]
+tests/test_compliance.py::test_rule_repo_size_under_10mb PASSED          [ 56%]
+tests/test_compliance.py::test_security_gitignore_protects_env PASSED    [ 58%]
+tests/test_compliance.py::test_required_files_exist PASSED               [ 60%]
+tests/test_compliance.py::test_app_syntax_compilation PASSED             [ 61%]
+tests/test_doc_parser.py::test_extract_txt_utf8 PASSED                   [ 63%]
+tests/test_doc_parser.py::test_extract_txt_latin1 PASSED                 [ 65%]
+tests/test_doc_parser.py::test_extract_none PASSED                       [ 66%]
+tests/test_doc_parser.py::test_extract_empty_name PASSED                 [ 68%]
+tests/test_doc_parser.py::test_extract_unsupported_format PASSED         [ 70%]
+tests/test_doc_parser.py::test_extract_pdf_success PASSED                [ 71%]
+tests/test_doc_parser.py::test_extract_pdf_zero_pages PASSED             [ 73%]
+tests/test_doc_parser.py::test_extract_pdf_truncation_guard PASSED       [ 75%]
+tests/test_doc_parser.py::test_extract_pdf_exception_handling PASSED     [ 76%]
+tests/test_security_a11y.py::test_sanitize_filename_unix_traversal PASSED [ 78%]
+tests/test_security_a11y.py::test_sanitize_filename_windows_traversal PASSED [ 80%]
+tests/test_security_a11y.py::test_sanitize_filename_empty_and_special PASSED [ 81%]
+tests/test_security_a11y.py::test_file_size_exceeded_guard_txt PASSED    [ 83%]
+tests/test_security_a11y.py::test_null_byte_sanitization PASSED          [ 85%]
+tests/test_security_a11y.py::test_prompt_injection_guard_isolation PASSED [ 86%]
+tests/test_security_a11y.py::test_xss_escaping_in_simulation PASSED      [ 88%]
+tests/test_security_a11y.py::test_simulation_aria_accessibility_landmarks PASSED [ 90%]
+tests/test_security_a11y.py::test_models_fast_fallback_priority PASSED   [ 91%]
+tests/test_security_a11y.py::test_simulation_generation_latency PASSED   [ 93%]
+tests/test_simulation.py::test_simulation_html_default PASSED            [ 95%]
 tests/test_simulation.py::test_simulation_html_no_truncation PASSED      [ 96%]
 tests/test_simulation.py::test_simulation_special_characters_escaping PASSED [ 98%]
 tests/test_simulation.py::test_simulation_viewport_dimensions PASSED     [100%]
@@ -175,12 +184,12 @@ tests/test_simulation.py::test_simulation_viewport_dimensions PASSED     [100%]
 Name                       Stmts   Miss  Cover
 ----------------------------------------------
 utils\__init__.py              0      0   100%
-utils\ai_helpers.py          100      5    95%
+utils\ai_helpers.py          157      3    98%
 utils\doc_parser.py           63      3    95%
-utils\simulation_view.py      12      0   100%
+utils\simulation_view.py       7      0   100%
 ----------------------------------------------
-TOTAL                        175      8    95%
-============================= 51 passed in 0.44s ==============================
+TOTAL                        227      6    97%
+============================= 60 passed in 6.16s ==============================
 ```
 </details>
 

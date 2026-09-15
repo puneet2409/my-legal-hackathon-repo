@@ -1,5 +1,3 @@
-import os
-import re
 from unittest.mock import MagicMock
 from utils.doc_parser import sanitize_filename, extract_text_from_file, MAX_FILE_SIZE_BYTES
 from utils.simulation_view import get_office_simulation_html

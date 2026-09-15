@@ -1,6 +1,5 @@
 import os
 import py_compile
-import pytest
 
 def test_rule_repo_size_under_10mb():
     """Validates Hack2Skill Rule: The repository size must be less than 10 MB."""

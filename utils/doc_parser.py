@@ -1,8 +1,7 @@
-import io
 import os
 import re
 import logging
-from typing import Any, Optional
+from typing import Any
 import pypdf
 
 # Configure module-level logger
@@ -12,6 +11,7 @@ logger = logging.getLogger(__name__)
 MAX_PAGES: int = 50
 MAX_FILE_SIZE_BYTES: int = 10 * 1024 * 1024  # 10 MB limit to prevent Memory/DoS attacks
 SUPPORTED_EXTENSIONS = {"pdf", "txt"}
+RE_SAFE_FILENAME = re.compile(r"[^a-zA-Z0-9_.-]")
 
 
 def sanitize_filename(filename: str) -> str:
@@ -29,7 +29,7 @@ def sanitize_filename(filename: str) -> str:
     # Strip directory path traversal sequences (both / and \)
     base = os.path.basename(filename.replace("\\", "/"))
     # Keep only safe alphanumeric characters, underscores, hyphens, and dots
-    clean = re.sub(r"[^a-zA-Z0-9_.-]", "_", base)
+    clean = RE_SAFE_FILENAME.sub("_", base)
     return clean.strip("._")
 
 
