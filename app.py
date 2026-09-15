@@ -6,6 +6,8 @@ from utils.ai_helpers import (
     get_document_summary, analyze_document_risks, ask_question_about_document, 
     compare_contracts, agent_a_opening, agent_b_response, agent_a_counter
 )
+from utils.simulation_view import get_office_simulation_html
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="LegalLens: AI Legal Co-Pilot & Simulator",
@@ -104,9 +106,10 @@ def main():
         st.caption(f"📁 Analyzing: **{st.session_state.active_doc_name}** | Language: **{language}**")
         
         # Main Interface Tabs
-        tab1, tab2, tab3, tab4 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "📝 Plain English Summary",
             "🚨 Clause Risk Analyzer",
+            "🎭 2D Office & Negotiation Simulation",
             "💬 Interactive Q&A",
             "⚖️ Version Comparison"
         ])
@@ -134,7 +137,7 @@ def main():
                     help="Export the plain-English summary"
                 )
 
-        # --- TAB 2: RISK ANALYZER & SIMULATION ---
+        # --- TAB 2: RISK ANALYZER ---
         with tab2:
             st.subheader("Clause-by-Clause Risk & Red-Flag Analyzer")
             st.caption("Spots predatory clauses like auto-renewals, broad liability, and hidden termination penalties.")
@@ -154,43 +157,48 @@ def main():
                     mime="text/markdown",
                     key="dl_risks"
                 )
+
+        # --- TAB 3: 2D OFFICE & NEGOTIATION SIMULATION ---
+        with tab3:
+            st.subheader("🎭 Interactive 2D Law Office Simulation")
+            st.caption("Inspired by Generative Agents: Autonomous AI agents move across office rooms (Research Library, Conference Room, Opposing Desk) to negotiate terms live.")
+
+            col_run_sim, _ = st.columns([0.35, 0.65])
+            with col_run_sim:
+                run_sim_btn = st.button("▶️ Launch 2D Agent Simulation", type="primary", use_container_width=True, key="btn_run_2d_sim")
+
+            if run_sim_btn or "sim_msg1" in st.session_state:
+                if run_sim_btn:
+                    with st.spinner("AI agents are examining legal clauses and roleplaying negotiation..."):
+                        m1 = agent_a_opening(st.session_state.document_text, language)
+                        m2 = agent_b_response(st.session_state.document_text, m1, language)
+                        m3 = agent_a_counter(st.session_state.document_text, m2, language)
+                        st.session_state.sim_msg1 = m1
+                        st.session_state.sim_msg2 = m2
+                        st.session_state.sim_msg3 = m3
                 
-                # --- INTEGRATED AI SIMULATOR ---
-                st.divider()
-                st.subheader("🎭 Autonomous Negotiation Simulation")
-                st.info(
-                    "Watch two AI agents roleplay a live negotiation on the problematic clauses detected above. "
-                    "**Agent A** fights for your rights; **Agent B** defends the document.",
-                    icon="🤖"
+                # Render the 2D Canvas Office Map
+                components.html(
+                    get_office_simulation_html(
+                        st.session_state.sim_msg1,
+                        st.session_state.sim_msg2,
+                        st.session_state.sim_msg3
+                    ),
+                    height=470
                 )
                 
-                if st.button("Launch Live Agent Negotiation", key="btn_sim_nego", help="Simulate back-and-forth negotiation arguments"):
-                    # Step 1: Agent A Opening
-                    with st.chat_message("user", avatar="🧑‍⚖️"):
-                        with st.spinner("Your AI Lawyer is analyzing the clauses to form an argument..."):
-                            msg1 = agent_a_opening(st.session_state.document_text, language)
-                            st.markdown(f"**Your Legal Counsel:**\n\n{msg1}")
-                    
-                    time.sleep(1)
-                    
-                    # Step 2: Agent B Defense
-                    with st.chat_message("assistant", avatar="🕴️"):
-                        with st.spinner("Opposing Counsel is formulating a formal response..."):
-                            msg2 = agent_b_response(st.session_state.document_text, msg1, language)
-                            st.markdown(f"**Opposing Counsel:**\n\n{msg2}")
-                    
-                    time.sleep(1)
-                    
-                    # Step 3: Agent A Counter
-                    with st.chat_message("user", avatar="🧑‍⚖️"):
-                        with st.spinner("Your AI Lawyer is delivering a protective counter-offer..."):
-                            msg3 = agent_a_counter(st.session_state.document_text, msg2, language)
-                            st.markdown(f"**Your Legal Counsel (Final Counter):**\n\n{msg3}")
-                            
-                    st.success("✅ Simulation complete! You can use these strategic points when discussing this contract.")
+                # Full negotiation transcript
+                with st.expander("📜 Full Strategic Negotiation Transcript", expanded=True):
+                    st.markdown(f"**🧑‍⚖️ Alex (Your Legal Counsel):**\n\n{st.session_state.sim_msg1}")
+                    st.markdown(f"**🕴️ Morgan (Opposing Counsel):**\n\n{st.session_state.sim_msg2}")
+                    st.markdown(f"**🧑‍⚖️ Alex (Final Protective Terms):**\n\n{st.session_state.sim_msg3}")
+            else:
+                # Default live 2D canvas view
+                components.html(get_office_simulation_html(), height=470)
+                st.info("Click **'▶️ Launch 2D Agent Simulation'** above to generate arguments based on your uploaded document and watch the agents navigate and negotiate live on the map!")
 
-        # --- TAB 3: CHAT Q&A ---
-        with tab3:
+        # --- TAB 4: CHAT Q&A ---
+        with tab4:
             st.subheader("Chat with your Document")
             st.caption("Ask specific questions grounded strictly in the contents of your uploaded document.")
             
@@ -211,8 +219,8 @@ def main():
                         st.markdown(ai_response)
                         st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
 
-        # --- TAB 4: COMPARE CONTRACTS ---
-        with tab4:
+        # --- TAB 5: COMPARE CONTRACTS ---
+        with tab5:
             st.subheader("Contract Version Comparison")
             st.caption("Upload an updated or counter-party version to detect additions, deletions, and subtle changes.")
             
