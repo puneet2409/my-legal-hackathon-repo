@@ -36,7 +36,7 @@ def main():
             return
 
         # UI Tabs
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📝 Summary", "🚨 Risk Analyzer", "💬 Chat", "⚖️ Compare", "🎭 AI Agent Simulation"])
+        tab1, tab2, tab3, tab4 = st.tabs(["📝 Summary", "🚨 Risk Analyzer", "💬 Chat", "⚖️ Compare"])
         
         with tab1:
             st.subheader(f"Document Summary ({language})")
@@ -53,8 +53,35 @@ def main():
                 with st.spinner("Scanning for risks..."):
                     risks = analyze_document_risks(st.session_state.document_text, language)
                     st.session_state.risks = risks
+            
             if st.session_state.get("risks"):
                 st.markdown(st.session_state.risks)
+                
+                st.divider()
+                st.subheader("🎭 Live Negotiation Simulation")
+                st.info("Watch your AI Lawyer and Opposing Counsel debate the risks identified above in real-time.", icon="🤖")
+                
+                if st.button("Simulate Negotiation for these Risks"):
+                    with st.chat_message("user", avatar="🧑‍⚖️"):
+                        with st.spinner("Your AI Lawyer is aggressively analyzing the document..."):
+                            msg1 = agent_a_opening(st.session_state.document_text, language)
+                            st.markdown(f"**Your Lawyer:**\n\n{msg1}")
+                    
+                    time.sleep(1) # Artificial dramatic pause
+                    
+                    with st.chat_message("assistant", avatar="🕴️"):
+                        with st.spinner("Opposing Counsel is formulating a defense..."):
+                            msg2 = agent_b_response(st.session_state.document_text, msg1, language)
+                            st.markdown(f"**Opposing Counsel:**\n\n{msg2}")
+                    
+                    time.sleep(1)
+                    
+                    with st.chat_message("user", avatar="🧑‍⚖️"):
+                        with st.spinner("Your AI Lawyer is drafting a counter-offer..."):
+                            msg3 = agent_a_counter(st.session_state.document_text, msg2, language)
+                            st.markdown(f"**Your Lawyer:**\n\n{msg3}")
+                            
+                    st.success("Simulation Complete! You can use these arguments to push back in real life.")
 
         with tab3:
             st.subheader("Chat with your Document")
@@ -79,34 +106,6 @@ def main():
                 with st.spinner("Extracting text and comparing..."):
                     doc2_text = extract_text_from_file(uploaded_file_2)
                     st.markdown(compare_contracts(st.session_state.document_text, doc2_text, language))
-        
-        with tab5:
-            st.subheader("Autonomous Negotiation Simulator")
-            st.info("Watch two autonomous AI agents (Your Lawyer vs. Opposing Counsel) actively negotiate the most unfair clause in this document.", icon="🤖")
-            
-            if st.button("Start Live Negotiation Simulation"):
-                
-                with st.chat_message("user", avatar="🧑‍⚖️"):
-                    with st.spinner("Your AI Lawyer is aggressively analyzing the document..."):
-                        msg1 = agent_a_opening(st.session_state.document_text, language)
-                        st.markdown(f"**Your Lawyer:**\n\n{msg1}")
-                
-                time.sleep(1) # Artificial dramatic pause
-                
-                with st.chat_message("assistant", avatar="🕴️"):
-                    with st.spinner("Opposing Counsel is formulating a defense..."):
-                        msg2 = agent_b_response(st.session_state.document_text, msg1, language)
-                        st.markdown(f"**Opposing Counsel:**\n\n{msg2}")
-                
-                time.sleep(1)
-                
-                with st.chat_message("user", avatar="🧑‍⚖️"):
-                    with st.spinner("Your AI Lawyer is drafting a counter-offer..."):
-                        msg3 = agent_a_counter(st.session_state.document_text, msg2, language)
-                        st.markdown(f"**Your Lawyer:**\n\n{msg3}")
-                        
-                st.success("Simulation Complete! You can use these arguments if you negotiate this contract in real life.")
-
     else:
         st.info("👈 Please upload a primary document in the sidebar to get started.")
 
