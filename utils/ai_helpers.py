@@ -10,7 +10,7 @@ try:
 except Exception:
     client = None
 
-MODEL_ID = 'gemini-3.6-flash'
+MODEL_ID = 'gemini-3.8-flash'
 
 def get_document_summary(document_text: str, language: str = "English") -> str:
     """
