@@ -6,9 +6,8 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 # Always reload environment variables to catch runtime updates to .env
 load_dotenv(override=True)
 
-# Candidate models in preferred order
-MODELS = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.7-flash']
-CURRENT_MODEL = MODELS[0]
+# Candidate models in preferred order (prioritizing high-availability, uncongested endpoints)
+MODELS = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3-flash-preview', 'gemini-3.6-flash']
 
 def get_client() -> genai.Client:
     """
@@ -38,18 +37,17 @@ def is_transient_error(exception: BaseException) -> bool:
 
 @retry(
     retry=retry_if_exception(is_transient_error),
-    wait=wait_exponential(multiplier=1.5, min=2, max=10),
-    stop=stop_after_attempt(4)
+    wait=wait_exponential(multiplier=1.5, min=2, max=8),
+    stop=stop_after_attempt(3)
 )
 def _generate_with_retry(prompt: str) -> str:
     """
-    Executes an API call with automatic retry on transient errors and model fallback.
+    Executes an API call with automatic retry on transient errors and seamless model fallback.
     """
     client = get_client()
     if not client:
         raise ValueError("Gemini API key is not configured or invalid.")
 
-    # Try models in fallback order
     last_err = None
     for model_name in MODELS:
         try:
@@ -61,14 +59,8 @@ def _generate_with_retry(prompt: str) -> str:
                 return response.text
         except Exception as e:
             last_err = e
-            # If it's a 404 (model not found), try next model immediately
-            if "404" in str(e) or "NOT_FOUND" in str(e):
-                continue
-            # If transient, raise to let tenacity retry
-            if is_transient_error(e):
-                raise e
-            # Other errors, break and return
-            break
+            # Try next model in the fallback pool immediately
+            continue
 
     if last_err:
         raise last_err
