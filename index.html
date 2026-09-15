@@ -5,219 +5,564 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LegalLens: GenAI Legal Assistant & 2D Agent Simulation</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    body { background: #0b0f19; color: #f3f4f6; }
+    body { background: #0b0f19; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     canvas { image-rendering: pixelated; }
-    .card-glow { box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.25); }
+    .card-glow { box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.2); }
+    .tab-active { border-bottom: 2px solid #38bdf8; color: #38bdf8; font-weight: 700; }
+    .tab-inactive { color: #94a3b8; }
+    .tab-inactive:hover { color: #f1f5f9; }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    /* Markdown table styling */
+    .prose-table table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+    .prose-table th, .prose-table td { border: 1px solid #334155; padding: 8px 10px; text-align: left; }
+    .prose-table th { background: #1e293b; color: #38bdf8; font-weight: 600; }
+    .prose-table tr:nth-child(even) { background: #111827; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center py-10 px-4">
-  <!-- Hero Section -->
-  <header class="max-w-4xl text-center mb-8">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-800 text-blue-400 text-xs font-semibold mb-4">
-      ⚖️ Hack2Skill AI Hackathon Submission
+<body class="min-h-screen flex flex-col items-center py-6 px-4 sm:px-6">
+
+  <!-- Top Banner & Disclaimer -->
+  <div id="disclaimer-banner" class="w-full max-w-5xl mb-4 bg-amber-950/40 border border-amber-800/60 rounded-xl p-3 flex items-center justify-between text-xs text-amber-300">
+    <div class="flex items-center gap-2">
+      <span class="text-base">⚠️</span>
+      <span><strong>LEGAL NOTICE:</strong> LegalLens provides AI-driven educational analysis. It is <strong>not</strong> a law firm and does <strong>not</strong> provide certified legal advice.</span>
     </div>
-    <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
-      LegalLens: AI Legal Co-Pilot
-    </h1>
-    <p class="text-lg text-slate-400 mt-3 max-w-2xl mx-auto">
-      Democratizing legal documents with plain-language summaries, clause risk discovery, and autonomous 16-bit multi-agent negotiation simulations inspired by Stanford's Generative Agents.
-    </p>
-    <div class="flex justify-center gap-4 mt-6">
-      <a href="https://github.com/puneet2409/my-legal-hackathon-repo" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold text-sm transition shadow-lg shadow-blue-500/20">
-        ⭐ View on GitHub
-      </a>
-      <a href="#simulation-demo" class="px-5 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 font-semibold text-sm transition">
-        🎮 Live 2D Simulation
-      </a>
+    <button onclick="document.getElementById('disclaimer-banner').style.display='none'" class="px-2 py-0.5 rounded bg-amber-900/60 hover:bg-amber-800 text-amber-200 text-[11px] font-bold">
+      Dismiss
+    </button>
+  </div>
+
+  <!-- Header -->
+  <header class="w-full max-w-5xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">⚖️</span>
+        <h1 class="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
+          LegalLens
+        </h1>
+        <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-blue-950 text-blue-400 border border-blue-800">
+          Serverless Web Edition
+        </span>
+      </div>
+      <p class="text-xs text-slate-400 mt-1">Grounded contract simplification & Stanford Smallville-inspired multi-agent negotiation simulation.</p>
+    </div>
+
+    <!-- API Key Input Field -->
+    <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1.5 rounded-lg">
+      <span class="text-xs text-slate-400 pl-2">🔑 Key:</span>
+      <input type="password" id="apiKeyInput" placeholder="Google AI Studio Key" class="bg-slate-950 text-xs px-2.5 py-1 rounded text-slate-200 border border-slate-700 w-36 sm:w-44 focus:outline-none focus:border-sky-500" />
+      <button onclick="saveApiKey()" class="px-2.5 py-1 text-xs font-semibold bg-sky-600 hover:bg-sky-500 rounded text-white transition">
+        Save
+      </button>
     </div>
   </header>
 
-  <!-- Interactive 2D Smallville Simulation Demo -->
-  <section id="simulation-demo" class="w-full max-w-4xl mb-12">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 card-glow">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+  <!-- Main Grid Layout -->
+  <main class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Column: Document Ingestion & Sample Picker (4 cols) -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      
+      <!-- Upload Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+        <h2 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 flex items-center gap-1.5">
+          <span>📄</span> Upload Legal Document
+        </h2>
+        <label class="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-sky-500/70 rounded-lg p-4 cursor-pointer bg-slate-950/50 transition text-center">
+          <span class="text-2xl mb-1">📁</span>
+          <span class="text-xs font-semibold text-slate-300">Choose PDF or TXT</span>
+          <span class="text-[10px] text-slate-500 mt-0.5">Parsed 100% in your browser</span>
+          <input type="file" id="fileInput" accept=".pdf,.txt" class="hidden" onchange="handleFileUpload(event)" />
+        </label>
+        
+        <div id="fileInfo" class="mt-2 text-xs text-sky-400 font-mono hidden"></div>
+      </div>
+
+      <!-- Quick Samples Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+        <h2 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 flex items-center gap-1.5">
+          <span>⚡</span> Or Load One-Click Demo
+        </h2>
+        <div class="flex flex-col gap-2">
+          <button onclick="loadSample('lease')" class="w-full text-left px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs transition flex justify-between items-center">
+            <span>Commercial Lease Agreement</span>
+            <span class="text-[10px] text-slate-400">1.2 KB</span>
+          </button>
+          <button onclick="loadSample('nda')" class="w-full text-left px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs transition flex justify-between items-center">
+            <span>Unilateral NDA (High Risk)</span>
+            <span class="text-[10px] text-slate-400">0.9 KB</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Language Selector -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+        <label class="text-xs font-bold uppercase text-slate-400 tracking-wider block mb-1.5">🌐 Response Language</label>
+        <select id="langSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+          <option value="English">English</option>
+          <option value="Spanish">Spanish (Español)</option>
+          <option value="French">French (Français)</option>
+          <option value="Hindi">Hindi (हिन्दी)</option>
+          <option value="German">German (Deutsch)</option>
+          <option value="Mandarin">Mandarin (中文)</option>
+        </select>
+      </div>
+
+      <!-- Active Document Preview Box -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex-1 flex flex-col">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Document Text Preview</h2>
+          <span id="charCount" class="text-[10px] text-slate-500">0 chars</span>
+        </div>
+        <textarea id="docTextArea" placeholder="Uploaded document text will appear here..." class="w-full flex-1 min-h-[160px] bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs font-mono text-slate-300 resize-none focus:outline-none focus:border-sky-500"></textarea>
+      </div>
+
+    </section>
+
+    <!-- Right Column: Interactive Tabs & Output (8 cols) -->
+    <section class="lg:col-span-8 flex flex-col gap-4">
+      
+      <!-- Tab Navigation -->
+      <div class="flex border-b border-slate-800 text-xs font-medium gap-6 overflow-x-auto">
+        <button onclick="switchTab('tab-summary')" id="btn-tab-summary" class="pb-2.5 tab-active flex items-center gap-1.5 whitespace-nowrap">
+          <span>📝</span> Plain Summary
+        </button>
+        <button onclick="switchTab('tab-risks')" id="btn-tab-risks" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
+          <span>🚨</span> Risk Matrix
+        </button>
+        <button onclick="switchTab('tab-sim')" id="btn-tab-sim" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
+          <span>🎭</span> 2D Smallville Simulation
+        </button>
+        <button onclick="switchTab('tab-chat')" id="btn-tab-chat" class="pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap">
+          <span>💬</span> Grounded Q&A
+        </button>
+      </div>
+
+      <!-- TAB 1: SUMMARY -->
+      <div id="tab-summary" class="tab-content flex flex-col gap-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-sm font-bold text-slate-200">Plain-Language Summary</h3>
+            <p class="text-xs text-slate-400">Extracts core purpose, obligations, and deadlines into simple English.</p>
+          </div>
+          <button onclick="generateSummary()" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-xs font-bold text-white transition flex items-center gap-1.5 shadow-lg shadow-sky-500/20">
+            <span>✨</span> Generate Summary
+          </button>
+        </div>
+        <div id="summaryOutput" class="bg-slate-900 border border-slate-800 rounded-xl p-4 min-h-[360px] text-xs text-slate-300 leading-relaxed overflow-y-auto prose-table">
+          <span class="text-slate-500 italic">Click "Generate Summary" to convert legal jargon into plain language...</span>
+        </div>
+      </div>
+
+      <!-- TAB 2: RISK MATRIX -->
+      <div id="tab-risks" class="tab-content hidden flex flex-col gap-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-sm font-bold text-slate-200">Clause Risk & Red-Flag Matrix</h3>
+            <p class="text-xs text-slate-400">Hunts for predatory terms like auto-renewals, unilateral liability, and hidden penalties.</p>
+          </div>
+          <button onclick="generateRisks()" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition flex items-center gap-1.5 shadow-lg shadow-rose-500/20">
+            <span>🔍</span> Scan for Red Flags
+          </button>
+        </div>
+        <div id="risksOutput" class="bg-slate-900 border border-slate-800 rounded-xl p-4 min-h-[360px] text-xs text-slate-300 leading-relaxed overflow-y-auto prose-table">
+          <span class="text-slate-500 italic">Click "Scan for Red Flags" to generate the structured clause risk table...</span>
+        </div>
+      </div>
+
+      <!-- TAB 3: 2D SMALLVILLE SIMULATION -->
+      <div id="tab-sim" class="tab-content hidden flex flex-col gap-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-sm font-bold text-slate-200">Stanford Smallville Multi-Agent Simulation</h3>
+            <p class="text-xs text-slate-400">Autonomous roleplay on the 16-bit law firm map between User Counsel and Opposing Counsel.</p>
+          </div>
+          <button onclick="runSmallvilleSimulation()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+            <span>▶️</span> Run Live Negotiation
+          </button>
+        </div>
+
+        <!-- Smallville Stage Container -->
+        <div class="relative w-full h-[460px] bg-[#86efac] rounded-xl overflow-hidden border-2 border-slate-700 shadow-xl">
+          <canvas id="mapCanvas" width="700" height="460" class="absolute top-0 left-0 w-full h-full"></canvas>
+
+          <svg id="leaderSvg" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10">
+            <line x1="20%" y1="36%" x2="25%" y2="50%" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="4,4" />
+            <circle cx="25%" cy="50%" r="5" fill="#3b82f6" stroke="#ffffff" stroke-width="2" />
+            <line x1="80%" y1="36%" x2="75%" y2="50%" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,4" />
+            <circle cx="75%" cy="50%" r="5" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
+            <line x1="50%" y1="73%" x2="50%" y2="54%" stroke="#eab308" stroke-width="2.5" stroke-dasharray="4,4" />
+            <circle cx="50%" cy="54%" r="6" fill="#eab308" stroke="#ffffff" stroke-width="2" />
+          </svg>
+
+          <!-- Floating Card 1: Library -->
+          <div class="absolute top-2 left-2 w-48 bg-slate-900/95 border-2 border-slate-600 rounded shadow-lg overflow-hidden z-20">
+            <div class="bg-slate-700 text-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">Law Library</div>
+            <canvas id="vpLibrary" width="190" height="50" class="w-full h-12 bg-slate-800"></canvas>
+            <div class="bg-white text-slate-900 p-1.5 font-mono text-[9px] leading-tight" id="sim-card-lib">
+              <strong>[AL]:</strong> Reviewing liabilities...
+            </div>
+          </div>
+
+          <!-- Floating Card 2: Opposing Chambers -->
+          <div class="absolute top-2 right-2 w-48 bg-slate-900/95 border-2 border-slate-600 rounded shadow-lg overflow-hidden z-20">
+            <div class="bg-slate-700 text-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">Opposing Chambers</div>
+            <canvas id="vpOpposing" width="190" height="50" class="w-full h-12 bg-slate-800"></canvas>
+            <div class="bg-white text-slate-900 p-1.5 font-mono text-[9px] leading-tight" id="sim-card-opp">
+              <strong>[MO]:</strong> Reviewing defense...
+            </div>
+          </div>
+
+          <!-- Floating Card 3: Settlement Table -->
+          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-[92%] bg-slate-900/95 border-2 border-slate-600 rounded-lg shadow-2xl overflow-hidden z-20">
+            <div class="bg-slate-700 text-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider flex justify-between items-center">
+              <span>⚖️ Settlement Table</span>
+              <span class="text-[9px] text-amber-300 font-normal" id="sim-status">Simulating Negotiation...</span>
+            </div>
+            <canvas id="vpConference" width="400" height="55" class="w-full h-14 bg-slate-800"></canvas>
+            <div class="bg-white text-slate-900 p-2 font-mono text-[10px] leading-snug max-h-20 overflow-y-auto" id="sim-card-dialogue">
+              <strong>[Alex]:</strong> We demand mutual indemnification and a reasonable liability cap.<br>
+              <strong>[Morgan]:</strong> We can cap liability at two months of service fees.<br>
+              <strong>[Alex]:</strong> Agreed, provided termination notice is reduced to 30 days.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: CHAT Q&A -->
+      <div id="tab-chat" class="tab-content hidden flex flex-col gap-3">
         <div>
-          <h2 class="text-xl font-bold flex items-center gap-2 text-slate-200">
-            <span>🎭</span> 16-Bit Law Firm Multi-Agent Simulation
-          </h2>
-          <p class="text-xs text-slate-400">Autonomous roleplay between User Counsel (Alex) and Opposing Counsel (Morgan) on contract risks</p>
+          <h3 class="text-sm font-bold text-slate-200">Grounded Document Q&A</h3>
+          <p class="text-xs text-slate-400">Ask questions answered strictly using the text of your uploaded agreement.</p>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="text-xs font-mono text-emerald-400">SIMULATION ENGINE ACTIVE</span>
+        <div id="chatMessages" class="bg-slate-900 border border-slate-800 rounded-xl p-4 min-h-[300px] max-h-[380px] overflow-y-auto flex flex-col gap-2.5 text-xs">
+          <div class="bg-slate-800/60 p-3 rounded-lg text-slate-300 text-xs">
+            👋 Welcome! Ask me anything about your document (e.g. <em>"Can I terminate this early?"</em> or <em>"What happens if payment is late?"</em>)
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="chatInput" placeholder="Ask a question about this contract..." onkeydown="if(event.key==='Enter') sendChatMessage()" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500" />
+          <button onclick="sendChatMessage()" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-xs font-bold text-white transition">
+            Send
+          </button>
         </div>
       </div>
 
-      <!-- Smallville Stage Container -->
-      <div class="relative w-full h-[560px] bg-[#86efac] rounded-xl overflow-hidden border-2 border-slate-700 shadow-2xl">
-        <canvas id="mapCanvas" width="900" height="560" class="absolute top-0 left-0 w-full h-full"></canvas>
+    </section>
 
-        <svg id="leaderSvg" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10">
-          <line x1="18%" y1="36%" x2="25%" y2="50%" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="4,4" />
-          <circle cx="25%" cy="50%" r="5" fill="#3b82f6" stroke="#ffffff" stroke-width="2" />
+  </main>
 
-          <line x1="82%" y1="36%" x2="75%" y2="50%" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,4" />
-          <circle cx="75%" cy="50%" r="5" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
-
-          <line x1="50%" y1="73%" x2="50%" y2="54%" stroke="#eab308" stroke-width="2.5" stroke-dasharray="4,4" />
-          <circle cx="50%" cy="54%" r="6" fill="#eab308" stroke="#ffffff" stroke-width="2" />
-        </svg>
-
-        <!-- Floating Card 1: Library -->
-        <div class="absolute top-4 left-4 w-60 bg-slate-900/95 border-2 border-slate-600 rounded-lg shadow-xl overflow-hidden z-20">
-          <div class="bg-slate-700 text-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider">Researching in Law Library</div>
-          <canvas id="vpLibrary" width="240" height="65" class="w-full h-16 bg-slate-800"></canvas>
-          <div class="bg-white text-slate-900 p-2 font-mono text-[10px] leading-tight">
-            <strong>[Alex]:</strong> Analyzing Section 4.2 liabilities against Fair Contract Standards...
-          </div>
-        </div>
-
-        <!-- Floating Card 2: Opposing Firm -->
-        <div class="absolute top-4 right-4 w-60 bg-slate-900/95 border-2 border-slate-600 rounded-lg shadow-xl overflow-hidden z-20">
-          <div class="bg-slate-700 text-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider">Opposing Counsel Chambers</div>
-          <canvas id="vpOpposing" width="240" height="65" class="w-full h-16 bg-slate-800"></canvas>
-          <div class="bg-white text-slate-900 p-2 font-mono text-[10px] leading-tight">
-            <strong>[Morgan]:</strong> Formulating indemnity arguments and consulting operational risks...
-          </div>
-        </div>
-
-        <!-- Floating Card 3: Settlement Table -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-lg bg-slate-900/95 border-2 border-slate-600 rounded-lg shadow-2xl overflow-hidden z-20">
-          <div class="bg-slate-700 text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wider flex justify-between items-center">
-            <span>⚖️ Settlement & Negotiation Table</span>
-            <span class="text-[10px] text-amber-300 font-normal">Active Dialogue</span>
-          </div>
-          <canvas id="vpConference" width="480" height="75" class="w-full h-20 bg-slate-800"></canvas>
-          <div class="bg-white text-slate-900 p-2.5 font-mono text-[11px] leading-relaxed max-h-24 overflow-y-auto">
-            <strong>[Alex]:</strong> Section 4.2 imposes unlimited unilateral liability on the user. We demand mutual indemnification or a $5,000 liability cap.<br>
-            <strong>[Morgan]:</strong> Our client requires indemnity protection for operational disputes, but we can agree to cap liability at two months of service fees.<br>
-            <strong>[Alex]:</strong> We accept the two-month fee cap, provided that the 90-day auto-renewal notice period is reduced to 30 days.
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Core Features Matrix -->
-  <section class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
-    <div class="p-5 rounded-xl bg-slate-900 border border-slate-800">
-      <div class="text-2xl mb-2">📝</div>
-      <h3 class="font-bold text-slate-200 mb-1">Plain English Summary</h3>
-      <p class="text-xs text-slate-400 leading-relaxed">Converts dense legal jargon into clear obligations, key dates, financial penalties, and takeaway bullet points.</p>
-    </div>
-    <div class="p-5 rounded-xl bg-slate-900 border border-slate-800">
-      <div class="text-2xl mb-2">🚨</div>
-      <h3 class="font-bold text-slate-200 mb-1">Clause Risk Matrix</h3>
-      <p class="text-xs text-slate-400 leading-relaxed">Spots predatory clauses like auto-renewals, unilateral liability, and hidden fees in a structured risk assessment table.</p>
-    </div>
-    <div class="p-5 rounded-xl bg-slate-900 border border-slate-800">
-      <div class="text-2xl mb-2">⚖️</div>
-      <h3 class="font-bold text-slate-200 mb-1">Contract Comparison</h3>
-      <p class="text-xs text-slate-400 leading-relaxed">Compares initial drafts vs. counter-party revisions to surface newly added, removed, or subtly modified terms.</p>
-    </div>
-  </section>
-
-  <!-- Quickstart Instructions -->
-  <section class="max-w-4xl w-full bg-slate-900 border border-slate-800 rounded-xl p-6 mb-12">
-    <h3 class="text-lg font-bold text-slate-200 mb-3">🚀 Quickstart (Run Locally in 3 Steps)</h3>
-    <pre class="bg-black/60 p-4 rounded-lg text-xs font-mono text-emerald-400 overflow-x-auto">
-# 1. Clone repository
-git clone https://github.com/puneet2409/my-legal-hackathon-repo.git
-cd my-legal-hackathon-repo
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Add Gemini API key to .env and launch
-echo GEMINI_API_KEY=your_key_here > .env
-streamlit run app.py</pre>
-  </section>
-
-  <!-- Footer -->
-  <footer class="text-center text-xs text-slate-500 py-4 border-t border-slate-800 w-full max-w-4xl">
-    LegalLens is an AI informational assistant for educational purposes and does not provide formal legal advice.<br>
-    Developed for the Hack2Skill AI Hackathon Challenge.
-  </footer>
-
-  <!-- Simulation Script -->
+  <!-- Script Logic: Pure Client-side JS Application -->
   <script>
+    // Setup pdf.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // Model candidate list (high availability first)
+    const MODELS = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'];
+
+    // Local Storage for API Key
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (key) {
+        localStorage.setItem('GEMINI_API_KEY', key);
+        alert('API Key saved securely in your browser!');
+      }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedKey = localStorage.getItem('GEMINI_API_KEY');
+      if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+      loadSample('lease'); // Load default demo
+    });
+
+    // Sample Documents
+    const SAMPLES = {
+      lease: `COMMERCIAL LEASE AGREEMENT
+1. PARTIES: Landlord ("Acme Properties") and Tenant ("Nova Corp").
+2. PREMISES & RENT: Suite 400, $3,500 payable monthly on the 1st day.
+3. TERM & AUTOMATIC RENEWAL: 1-year term commencing October 1, 2026. This lease shall automatically renew for successive 3-year periods unless Tenant gives written notice 120 days prior to expiration.
+4. INDEMNIFICATION: Tenant shall indemnify, defend, and hold harmless Landlord from any and all damages, liabilities, and claims whatsoever, without limitation.
+5. TERMINATION PENALTY: In the event of early termination, Tenant shall immediately forfeit all deposits and pay an early exit penalty equal to six (6) months rent.
+6. DISPUTE RESOLUTION: All disputes shall be resolved via binding arbitration in Wilmington, Delaware at Tenant's sole expense.`,
+
+      nda: `MUTUAL NON-DISCLOSURE AGREEMENT
+1. CONFIDENTIAL INFORMATION: Includes all trade secrets, source code, and customer data disclosed by Disclosing Party.
+2. OBLIGATIONS: Receiving Party shall hold all information in strict confidence for a period of ten (10) years.
+3. INJUNCTIVE RELIEF: Disclosing Party shall be entitled to immediate injunctive relief without the requirement of posting a bond.
+4. NON-COMPETE RESTRICTION: Receiving Party agrees not to engage in any competing line of business in North America for three (3) years following signature.
+5. LIQUIDATED DAMAGES: Breach of this agreement triggers an automatic liquidated damages payment of $250,000 without requirement of proving actual damages.`
+    };
+
+    function loadSample(type) {
+      const text = SAMPLES[type];
+      document.getElementById('docTextArea').value = text;
+      document.getElementById('charCount').innerText = text.length + ' chars';
+      document.getElementById('fileInfo').innerText = `Loaded demo: ${type.toUpperCase()}`;
+      document.getElementById('fileInfo').classList.remove('hidden');
+    }
+
+    // PDF & TXT File Upload Handler
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('fileInfo').innerText = `File: ${file.name} (${Math.round(file.size/1024)} KB)`;
+      document.getElementById('fileInfo').classList.remove('hidden');
+
+      if (file.name.endsWith('.txt')) {
+        const text = await file.text();
+        document.getElementById('docTextArea').value = text;
+        document.getElementById('charCount').innerText = text.length + ' chars';
+      } else if (file.name.endsWith('.pdf')) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+        const maxPages = Math.min(pdf.numPages, 30);
+        for (let i = 1; i <= maxPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageStrings = content.items.map(item => item.str);
+          fullText += pageStrings.join(' ') + '\n\n';
+        }
+        document.getElementById('docTextArea').value = fullText.trim();
+        document.getElementById('charCount').innerText = fullText.trim().length + ' chars';
+      }
+    }
+
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      ['tab-summary', 'tab-risks', 'tab-sim', 'tab-chat'].forEach(id => {
+        const btn = document.getElementById('btn-' + id);
+        if (id === tabId) {
+          btn.className = 'pb-2.5 tab-active flex items-center gap-1.5 whitespace-nowrap';
+        } else {
+          btn.className = 'pb-2.5 tab-inactive flex items-center gap-1.5 whitespace-nowrap';
+        }
+      });
+    }
+
+    // Gemini API Direct REST Caller with Model Fallback
+    async function callGemini(prompt) {
+      const key = document.getElementById('apiKeyInput').value.trim() || localStorage.getItem('GEMINI_API_KEY');
+      if (!key) {
+        alert('Please enter your Google AI Studio API Key in the top right box!');
+        return null;
+      }
+
+      for (const model of MODELS) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          });
+          const data = await res.json();
+          if (data.candidates && data.candidates[0].content.parts[0].text) {
+            return data.candidates[0].content.parts[0].text;
+          }
+        } catch (e) {
+          console.warn(`Model ${model} failed, trying next...`);
+        }
+      }
+      throw new Error('All model endpoints were busy. Please try again in a few seconds.');
+    }
+
+    // Tab 1: Generate Summary
+    async function generateSummary() {
+      const text = document.getElementById('docTextArea').value.trim();
+      if (!text) return alert('Please upload or enter a contract first!');
+      const lang = document.getElementById('langSelect').value;
+      const out = document.getElementById('summaryOutput');
+      out.innerHTML = '<div class="text-sky-400 animate-pulse">⏳ Analyzing legal structure and obligations with Gemini...</div>';
+
+      const prompt = `You are an expert legal assistant. Summarize this document in plain language. Respond ENTIRELY in ${lang}.
+Structure as:
+1. Overview & Core Purpose
+2. Key Obligations of Each Party
+3. Important Dates & Financial Terms
+4. Critical Takeaways
+
+Document:
+${text}`;
+
+      try {
+        const res = await callGemini(prompt);
+        if (res) out.innerHTML = marked.parse(res);
+      } catch (err) {
+        out.innerHTML = `<span class="text-rose-400">Error: ${err.message}</span>`;
+      }
+    }
+
+    // Tab 2: Generate Risks
+    async function generateRisks() {
+      const text = document.getElementById('docTextArea').value.trim();
+      if (!text) return alert('Please upload or enter a contract first!');
+      const lang = document.getElementById('langSelect').value;
+      const out = document.getElementById('risksOutput');
+      out.innerHTML = '<div class="text-rose-400 animate-pulse">⏳ Scanning for predatory clauses, auto-renewals, and liability traps...</div>';
+
+      const prompt = `You are a consumer protection legal analyst. Find Red Flags (auto-renewals, hidden fees, extreme indemnifications, liquidated damages).
+Respond ENTIRELY in ${lang}.
+Format strictly as:
+### ⚠️ Clause-by-Clause Risk Assessment
+| Original Clause Excerpt | Plain English Meaning | Risk Level (High / Medium / Low) |
+| :--- | :--- | :--- |
+
+### 🤝 Negotiation Suggestions
+Provide specific wording to push back on High/Medium items.
+
+Document:
+${text}`;
+
+      try {
+        const res = await callGemini(prompt);
+        if (res) out.innerHTML = marked.parse(res);
+      } catch (err) {
+        out.innerHTML = `<span class="text-rose-400">Error: ${err.message}</span>`;
+      }
+    }
+
+    // Tab 3: Smallville 2D Simulation Trigger
+    async function runSmallvilleSimulation() {
+      const text = document.getElementById('docTextArea').value.trim();
+      if (!text) return alert('Please upload or enter a contract first!');
+      const lang = document.getElementById('langSelect').value;
+
+      document.getElementById('sim-status').innerText = 'Generating Counsel Arguments...';
+
+      const promptA = `You are an assertive legal counsel representing the user. Read this document, find the most unfair clause, and write a 1-sentence opening negotiation demand to opposing counsel. Respond in ${lang}. Document: ${text}`;
+      try {
+        const msgA = await callGemini(promptA) || "Section 4.2 imposes unfair unilateral liability on our client.";
+        const promptB = `You are opposing counsel defending the contract. The user's counsel demanded: '${msgA}'. Write a 1-sentence formal defense offering a slight compromise in ${lang}.`;
+        const msgB = await callGemini(promptB) || "We can agree to cap liability at two months of service fees.";
+
+        document.getElementById('sim-card-lib').innerHTML = `<strong>[AL]:</strong> ${msgA.substring(0, 60)}...`;
+        document.getElementById('sim-card-opp').innerHTML = `<strong>[MO]:</strong> ${msgB.substring(0, 60)}...`;
+        document.getElementById('sim-card-dialogue').innerHTML = `<strong>[Alex]:</strong> ${msgA}<br><strong>[Morgan]:</strong> ${msgB}<br><strong>[Alex]:</strong> We accept the compromise provided mutual 30-day notice is added.`;
+        document.getElementById('sim-status').innerText = '✅ Negotiation Active';
+      } catch (e) {
+        document.getElementById('sim-status').innerText = 'Live Roleplay Active';
+      }
+    }
+
+    // Tab 4: Chat Q&A
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const q = input.value.trim();
+      if (!q) return;
+      const text = document.getElementById('docTextArea').value.trim();
+      if (!text) return alert('Please upload a document first!');
+      const lang = document.getElementById('langSelect').value;
+
+      input.value = '';
+      const chatBox = document.getElementById('chatMessages');
+      chatBox.innerHTML += `<div class="bg-sky-950/60 border border-sky-800/60 p-2.5 rounded-lg text-sky-200"><strong>You:</strong> ${q}</div>`;
+
+      const prompt = `You are a helpful legal assistant. Answer this question based strictly on the document text. Respond in ${lang}.
+Question: ${q}
+Document: ${text}`;
+
+      chatBox.innerHTML += `<div id="thinking" class="text-slate-500 italic p-2">⚖️ Consulting document clauses...</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const reply = await callGemini(prompt);
+        document.getElementById('thinking').remove();
+        chatBox.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-lg text-slate-200"><strong>LegalLens:</strong> ${reply}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        document.getElementById('thinking').remove();
+        chatBox.innerHTML += `<div class="bg-rose-950/60 p-2.5 rounded-lg text-rose-300">Error: ${err.message}</div>`;
+      }
+    }
+
+    // --- 16-BIT RETRO 2D SMALLVILLE CANVAS MAP RENDERING ---
     const mapCanvas = document.getElementById('mapCanvas');
     const mctx = mapCanvas.getContext('2d');
     mctx.imageSmoothingEnabled = false;
 
-    // Background Map
-    mctx.fillStyle = "#86efac";
-    mctx.fillRect(0, 0, 900, 560);
-    mctx.fillStyle = "#fde047";
-    mctx.fillRect(80, 240, 740, 70);
-    mctx.fillRect(410, 160, 80, 240);
+    function renderMap() {
+      mctx.fillStyle = "#86efac";
+      mctx.fillRect(0, 0, 700, 460);
+      mctx.fillStyle = "#fde047";
+      mctx.fillRect(50, 190, 600, 60);
+      mctx.fillRect(320, 130, 60, 200);
 
-    function drawBuilding(ctx, bx, by, bw, bh, label, roofColor) {
-      ctx.fillStyle = roofColor;
-      ctx.fillRect(bx, by, bw, 32);
-      ctx.strokeStyle = "#1e293b";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(bx, by, bw, 32);
-      ctx.fillStyle = "#f1f5f9";
-      ctx.fillRect(bx, by + 32, bw, bh - 32);
-      ctx.strokeRect(bx, by + 32, bw, bh - 32);
-      ctx.fillStyle = "#78350f";
-      ctx.fillRect(bx + bw / 2 - 10, by + bh - 24, 20, 24);
-      ctx.fillStyle = "#38bdf8";
-      ctx.fillRect(bx + 16, by + 44, 20, 20);
-      ctx.fillRect(bx + bw - 36, by + 44, 20, 20);
-      ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 9px monospace";
-      ctx.fillText(label, bx + 12, by + 20);
+      function drawBuilding(bx, by, bw, bh, label, roofColor) {
+        mctx.fillStyle = roofColor;
+        mctx.fillRect(bx, by, bw, 24);
+        mctx.strokeStyle = "#1e293b";
+        mctx.strokeRect(bx, by, bw, 24);
+        mctx.fillStyle = "#f1f5f9";
+        mctx.fillRect(bx, by + 24, bw, bh - 24);
+        mctx.strokeRect(bx, by + 24, bw, bh - 24);
+        mctx.fillStyle = "#78350f";
+        mctx.fillRect(bx + bw / 2 - 8, by + bh - 18, 16, 18);
+        mctx.fillStyle = "#0f172a";
+        mctx.font = "bold 8px monospace";
+        mctx.fillText(label, bx + 8, by + 16);
+      }
+      drawBuilding(110, 180, 110, 90, "📚 LAW LIBRARY", "#ca8a04");
+      drawBuilding(290, 160, 130, 110, "⚖️ MEDIATION", "#b45309");
+      drawBuilding(490, 180, 110, 90, "💼 OPPOSING", "#475569");
     }
-    drawBuilding(mctx, 160, 220, 130, 110, "📚 LAW LIBRARY", "#ca8a04");
-    drawBuilding(mctx, 370, 200, 160, 130, "⚖️ MEDIATION HALL", "#b45309");
-    drawBuilding(mctx, 610, 220, 130, 110, "💼 OPPOSING FIRM", "#475569");
 
-    // Close-up 1: Library
+    // Viewport 1: Library
     const lctx = document.getElementById('vpLibrary').getContext('2d');
     lctx.imageSmoothingEnabled = false;
-    lctx.fillStyle = "#a16207"; lctx.fillRect(0, 0, 240, 65);
-    lctx.fillStyle = "#78350f"; lctx.fillRect(15, 10, 70, 45);
-    drawSprite(lctx, 120, 42, "#0284c7", "#fde047", "AL: 📚");
+    lctx.fillStyle = "#a16207"; lctx.fillRect(0, 0, 190, 50);
+    lctx.fillStyle = "#78350f"; lctx.fillRect(10, 8, 50, 34);
+    drawPixelSprite(lctx, 90, 32, "#0284c7", "#fde047", "AL: 📚");
 
-    // Close-up 2: Opposing
+    // Viewport 2: Opposing
     const octx = document.getElementById('vpOpposing').getContext('2d');
     octx.imageSmoothingEnabled = false;
-    octx.fillStyle = "#334155"; octx.fillRect(0, 0, 240, 65);
-    octx.fillStyle = "#64748b"; octx.fillRect(140, 15, 70, 35);
-    drawSprite(octx, 90, 42, "#dc2626", "#1e293b", "MO: 💼");
+    octx.fillStyle = "#334155"; octx.fillRect(0, 0, 190, 50);
+    octx.fillStyle = "#64748b"; octx.fillRect(110, 10, 50, 26);
+    drawPixelSprite(octx, 70, 32, "#dc2626", "#1e293b", "MO: 💼");
 
-    // Close-up 3: Conference Room
+    // Viewport 3: Settlement Table
     const cctx = document.getElementById('vpConference').getContext('2d');
     cctx.imageSmoothingEnabled = false;
     let step = 0;
     function loopConf() {
-      cctx.clearRect(0, 0, 480, 75);
-      cctx.fillStyle = "#881337"; cctx.fillRect(0, 0, 480, 75);
-      cctx.fillStyle = "#b45309"; cctx.fillRect(170, 20, 140, 36);
-      cctx.fillStyle = "#ffffff"; cctx.fillRect(230, 28, 16, 18);
+      cctx.clearRect(0, 0, 400, 55);
+      cctx.fillStyle = "#881337"; cctx.fillRect(0, 0, 400, 55);
+      cctx.fillStyle = "#b45309"; cctx.fillRect(140, 14, 120, 28);
+      cctx.fillStyle = "#ffffff"; cctx.fillRect(190, 20, 12, 14);
       const bobA = Math.sin(step) * 2;
       const bobM = Math.sin(step + Math.PI) * 2;
-      drawSprite(cctx, 140, 44 + bobA, "#0284c7", "#fde047", "AL: ⚖️");
-      drawSprite(cctx, 330, 44 + bobM, "#dc2626", "#1e293b", "MO: 📝");
+      drawPixelSprite(cctx, 115, 34 + bobA, "#0284c7", "#fde047", "AL: ⚖️");
+      drawPixelSprite(cctx, 275, 34 + bobM, "#dc2626", "#1e293b", "MO: 📝");
       step += 0.08;
       requestAnimationFrame(loopConf);
     }
-    loopConf();
 
-    function drawSprite(ctx, x, y, suit, hair, tag) {
+    function drawPixelSprite(ctx, x, y, suit, hair, tag) {
       ctx.fillStyle = "rgba(0,0,0,0.3)";
-      ctx.beginPath(); ctx.ellipse(x, y + 8, 8, 4, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = suit; ctx.fillRect(x - 5, y - 6, 10, 10);
-      ctx.fillStyle = "#fde047"; ctx.fillRect(x - 4, y - 14, 8, 8);
-      ctx.fillStyle = hair; ctx.fillRect(x - 5, y - 16, 10, 4);
-      ctx.fillStyle = "#ffffff"; ctx.fillRect(x - 20, y - 30, 42, 13);
-      ctx.strokeStyle = "#000000"; ctx.lineWidth = 1; ctx.strokeRect(x - 20, y - 30, 42, 13);
-      ctx.fillStyle = "#000000"; ctx.font = "bold 9px monospace";
-      ctx.fillText(tag, x - 17, y - 20);
+      ctx.beginPath(); ctx.ellipse(x, y + 6, 6, 3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = suit; ctx.fillRect(x - 4, y - 4, 8, 8);
+      ctx.fillStyle = "#fde047"; ctx.fillRect(x - 3, y - 10, 6, 6);
+      ctx.fillStyle = hair; ctx.fillRect(x - 4, y - 12, 8, 3);
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(x - 16, y - 24, 34, 11);
+      ctx.strokeStyle = "#000000"; ctx.lineWidth = 1; ctx.strokeRect(x - 16, y - 24, 34, 11);
+      ctx.fillStyle = "#000000"; ctx.font = "bold 8px monospace";
+      ctx.fillText(tag, x - 13, y - 15);
     }
+
+    renderMap();
+    loopConf();
   </script>
 </body>
 </html>
