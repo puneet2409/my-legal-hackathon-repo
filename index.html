@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegalLens: GenAI Legal Assistant & 2D Agent Simulation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0b0f19; color: #f3f4f6; }
+    canvas { image-rendering: pixelated; }
+    .card-glow { box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.25); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
+  <!-- Hero Section -->
+  <header class="max-w-4xl text-center mb-8">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-800 text-blue-400 text-xs font-semibold mb-4">
+      ⚖️ Hack2Skill AI Hackathon Submission
+    </div>
+    <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
+      LegalLens: AI Legal Co-Pilot
+    </h1>
+    <p class="text-lg text-slate-400 mt-3 max-w-2xl mx-auto">
+      Democratizing legal documents with plain-language summaries, clause risk discovery, and autonomous 16-bit multi-agent negotiation simulations inspired by Stanford's Generative Agents.
+    </p>
+    <div class="flex justify-center gap-4 mt-6">
+      <a href="https://github.com/puneet2409/my-legal-hackathon-repo" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold text-sm transition shadow-lg shadow-blue-500/20">
+        ⭐ View on GitHub
+      </a>
+      <a href="#simulation-demo" class="px-5 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 font-semibold text-sm transition">
+        🎮 Live 2D Simulation
+      </a>
+    </div>
+  </header>
+
+  <!-- Interactive 2D Smallville Simulation Demo -->
+  <section id="simulation-demo" class="w-full max-w-4xl mb-12">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 card-glow">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+        <div>
+          <h2 class="text-xl font-bold flex items-center gap-2 text-slate-200">
+            <span>🎭</span> 16-Bit Law Firm Multi-Agent Simulation
+          </h2>
+          <p class="text-xs text-slate-400">Autonomous roleplay between User Counsel (Alex) and Opposing Counsel (Morgan) on contract risks</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-mono text-emerald-400">SIMULATION ENGINE ACTIVE</span>
+        </div>
+      </div>
+
+      <!-- Smallville Stage Container -->
+      <div class="relative w-full h-[560px] bg-[#86efac] rounded-xl overflow-hidden border-2 border-slate-700 shadow-2xl">
+        <canvas id="mapCanvas" width="900" height="560" class="absolute top-0 left-0 w-full h-full"></canvas>
+
+        <svg id="leaderSvg" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10">
+          <line x1="18%" y1="36%" x2="25%" y2="50%" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="4,4" />
+          <circle cx="25%" cy="50%" r="5" fill="#3b82f6" stroke="#ffffff" stroke-width="2" />
+
+          <line x1="82%" y1="36%" x2="75%" y2="50%" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,4" />
+          <circle cx="75%" cy="50%" r="5" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
+
+          <line x1="50%" y1="73%" x2="50%" y2="54%" stroke="#eab308" stroke-width="2.5" stroke-dasharray="4,4" />
+          <circle cx="50%" cy="54%" r="6" fill="#eab308" stroke="#ffffff" stroke-width="2" />
+        </svg>
+
+        <!-- Floating Card 1: Library -->
+        <div class="absolute top-4 left-4 w-60 bg-slate-900/95 border-2 border-slate-600 rounded-lg shadow-xl overflow-hidden z-20">
+          <div class="bg-slate-700 text-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider">Researching in Law Library</div>
+          <canvas id="vpLibrary" width="240" height="65" class="w-full h-16 bg-slate-800"></canvas>
+          <div class="bg-white text-slate-900 p-2 font-mono text-[10px] leading-tight">
+            <strong>[Alex]:</strong> Analyzing Section 4.2 liabilities against Fair Contract Standards...
+          </div>
+        </div>
+
+        <!-- Floating Card 2: Opposing Firm -->
+        <div class="absolute top-4 right-4 w-60 bg-slate-900/95 border-2 border-slate-600 rounded-lg shadow-xl overflow-hidden z-20">
+          <div class="bg-slate-700 text-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider">Opposing Counsel Chambers</div>
+          <canvas id="vpOpposing" width="240" height="65" class="w-full h-16 bg-slate-800"></canvas>
+          <div class="bg-white text-slate-900 p-2 font-mono text-[10px] leading-tight">
+            <strong>[Morgan]:</strong> Formulating indemnity arguments and consulting operational risks...
+          </div>
+        </div>
+
+        <!-- Floating Card 3: Settlement Table -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-lg bg-slate-900/95 border-2 border-slate-600 rounded-lg shadow-2xl overflow-hidden z-20">
+          <div class="bg-slate-700 text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wider flex justify-between items-center">
+            <span>⚖️ Settlement & Negotiation Table</span>
+            <span class="text-[10px] text-amber-300 font-normal">Active Dialogue</span>
+          </div>
+          <canvas id="vpConference" width="480" height="75" class="w-full h-20 bg-slate-800"></canvas>
+          <div class="bg-white text-slate-900 p-2.5 font-mono text-[11px] leading-relaxed max-h-24 overflow-y-auto">
+            <strong>[Alex]:</strong> Section 4.2 imposes unlimited unilateral liability on the user. We demand mutual indemnification or a $5,000 liability cap.<br>
+            <strong>[Morgan]:</strong> Our client requires indemnity protection for operational disputes, but we can agree to cap liability at two months of service fees.<br>
+            <strong>[Alex]:</strong> We accept the two-month fee cap, provided that the 90-day auto-renewal notice period is reduced to 30 days.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Features Matrix -->
+  <section class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+    <div class="p-5 rounded-xl bg-slate-900 border border-slate-800">
+      <div class="text-2xl mb-2">📝</div>
+      <h3 class="font-bold text-slate-200 mb-1">Plain English Summary</h3>
+      <p class="text-xs text-slate-400 leading-relaxed">Converts dense legal jargon into clear obligations, key dates, financial penalties, and takeaway bullet points.</p>
+    </div>
+    <div class="p-5 rounded-xl bg-slate-900 border border-slate-800">
+      <div class="text-2xl mb-2">🚨</div>
+      <h3 class="font-bold text-slate-200 mb-1">Clause Risk Matrix</h3>
+      <p class="text-xs text-slate-400 leading-relaxed">Spots predatory clauses like auto-renewals, unilateral liability, and hidden fees in a structured risk assessment table.</p>
+    </div>
+    <div class="p-5 rounded-xl bg-slate-900 border border-slate-800">
+      <div class="text-2xl mb-2">⚖️</div>
+      <h3 class="font-bold text-slate-200 mb-1">Contract Comparison</h3>
+      <p class="text-xs text-slate-400 leading-relaxed">Compares initial drafts vs. counter-party revisions to surface newly added, removed, or subtly modified terms.</p>
+    </div>
+  </section>
+
+  <!-- Quickstart Instructions -->
+  <section class="max-w-4xl w-full bg-slate-900 border border-slate-800 rounded-xl p-6 mb-12">
+    <h3 class="text-lg font-bold text-slate-200 mb-3">🚀 Quickstart (Run Locally in 3 Steps)</h3>
+    <pre class="bg-black/60 p-4 rounded-lg text-xs font-mono text-emerald-400 overflow-x-auto">
+# 1. Clone repository
+git clone https://github.com/puneet2409/my-legal-hackathon-repo.git
+cd my-legal-hackathon-repo
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Add Gemini API key to .env and launch
+echo GEMINI_API_KEY=your_key_here > .env
+streamlit run app.py</pre>
+  </section>
+
+  <!-- Footer -->
+  <footer class="text-center text-xs text-slate-500 py-4 border-t border-slate-800 w-full max-w-4xl">
+    LegalLens is an AI informational assistant for educational purposes and does not provide formal legal advice.<br>
+    Developed for the Hack2Skill AI Hackathon Challenge.
+  </footer>
+
+  <!-- Simulation Script -->
+  <script>
+    const mapCanvas = document.getElementById('mapCanvas');
+    const mctx = mapCanvas.getContext('2d');
+    mctx.imageSmoothingEnabled = false;
+
+    // Background Map
+    mctx.fillStyle = "#86efac";
+    mctx.fillRect(0, 0, 900, 560);
+    mctx.fillStyle = "#fde047";
+    mctx.fillRect(80, 240, 740, 70);
+    mctx.fillRect(410, 160, 80, 240);
+
+    function drawBuilding(ctx, bx, by, bw, bh, label, roofColor) {
+      ctx.fillStyle = roofColor;
+      ctx.fillRect(bx, by, bw, 32);
+      ctx.strokeStyle = "#1e293b";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(bx, by, bw, 32);
+      ctx.fillStyle = "#f1f5f9";
+      ctx.fillRect(bx, by + 32, bw, bh - 32);
+      ctx.strokeRect(bx, by + 32, bw, bh - 32);
+      ctx.fillStyle = "#78350f";
+      ctx.fillRect(bx + bw / 2 - 10, by + bh - 24, 20, 24);
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(bx + 16, by + 44, 20, 20);
+      ctx.fillRect(bx + bw - 36, by + 44, 20, 20);
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 9px monospace";
+      ctx.fillText(label, bx + 12, by + 20);
+    }
+    drawBuilding(mctx, 160, 220, 130, 110, "📚 LAW LIBRARY", "#ca8a04");
+    drawBuilding(mctx, 370, 200, 160, 130, "⚖️ MEDIATION HALL", "#b45309");
+    drawBuilding(mctx, 610, 220, 130, 110, "💼 OPPOSING FIRM", "#475569");
+
+    // Close-up 1: Library
+    const lctx = document.getElementById('vpLibrary').getContext('2d');
+    lctx.imageSmoothingEnabled = false;
+    lctx.fillStyle = "#a16207"; lctx.fillRect(0, 0, 240, 65);
+    lctx.fillStyle = "#78350f"; lctx.fillRect(15, 10, 70, 45);
+    drawSprite(lctx, 120, 42, "#0284c7", "#fde047", "AL: 📚");
+
+    // Close-up 2: Opposing
+    const octx = document.getElementById('vpOpposing').getContext('2d');
+    octx.imageSmoothingEnabled = false;
+    octx.fillStyle = "#334155"; octx.fillRect(0, 0, 240, 65);
+    octx.fillStyle = "#64748b"; octx.fillRect(140, 15, 70, 35);
+    drawSprite(octx, 90, 42, "#dc2626", "#1e293b", "MO: 💼");
+
+    // Close-up 3: Conference Room
+    const cctx = document.getElementById('vpConference').getContext('2d');
+    cctx.imageSmoothingEnabled = false;
+    let step = 0;
+    function loopConf() {
+      cctx.clearRect(0, 0, 480, 75);
+      cctx.fillStyle = "#881337"; cctx.fillRect(0, 0, 480, 75);
+      cctx.fillStyle = "#b45309"; cctx.fillRect(170, 20, 140, 36);
+      cctx.fillStyle = "#ffffff"; cctx.fillRect(230, 28, 16, 18);
+      const bobA = Math.sin(step) * 2;
+      const bobM = Math.sin(step + Math.PI) * 2;
+      drawSprite(cctx, 140, 44 + bobA, "#0284c7", "#fde047", "AL: ⚖️");
+      drawSprite(cctx, 330, 44 + bobM, "#dc2626", "#1e293b", "MO: 📝");
+      step += 0.08;
+      requestAnimationFrame(loopConf);
+    }
+    loopConf();
+
+    function drawSprite(ctx, x, y, suit, hair, tag) {
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
+      ctx.beginPath(); ctx.ellipse(x, y + 8, 8, 4, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = suit; ctx.fillRect(x - 5, y - 6, 10, 10);
+      ctx.fillStyle = "#fde047"; ctx.fillRect(x - 4, y - 14, 8, 8);
+      ctx.fillStyle = hair; ctx.fillRect(x - 5, y - 16, 10, 4);
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(x - 20, y - 30, 42, 13);
+      ctx.strokeStyle = "#000000"; ctx.lineWidth = 1; ctx.strokeRect(x - 20, y - 30, 42, 13);
+      ctx.fillStyle = "#000000"; ctx.font = "bold 9px monospace";
+      ctx.fillText(tag, x - 17, y - 20);
+    }
+  </script>
+</body>
+</html>
