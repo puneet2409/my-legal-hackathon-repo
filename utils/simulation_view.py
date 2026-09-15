@@ -2,13 +2,13 @@ import json
 
 def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -> str:
     """
-    Returns a self-contained HTML5 Canvas 2D office simulation.
-    Features top-down law firm map with moving agents, waypoint navigation,
-    and dynamic speech bubbles.
+    Returns an authentic 16-bit RPG pixel-art legal simulation map
+    styled after Stanford's Generative Agents (Smallville).
+    Features procedural pixel textures, animated sprites, and retro callout cards.
     """
-    safe_msg1 = json.dumps(msg1[:250] if msg1 else "Reviewing document clauses at bookshelf...")
-    safe_msg2 = json.dumps(msg2[:250] if msg2 else "Defending original terms at desk...")
-    safe_msg3 = json.dumps(msg3[:250] if msg3 else "Delivering protective counter-offer...")
+    safe_msg1 = json.dumps(msg1[:280] if msg1 else "Reviewing clause liabilities in legal library...")
+    safe_msg2 = json.dumps(msg2[:280] if msg2 else "Opposing counsel defending original contract terms...")
+    safe_msg3 = json.dumps(msg3[:280] if msg3 else "Delivering protective counter-offer terms...")
 
     html_code = f"""
     <!DOCTYPE html>
@@ -16,260 +16,423 @@ def get_office_simulation_html(msg1: str = "", msg2: str = "", msg3: str = "") -
     <head>
       <meta charset="utf-8">
       <style>
-        * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }}
-        body {{ background: #0f172a; color: #f8fafc; padding: 12px; display: flex; flex-direction: column; align-items: center; }}
-        #sim-container {{ position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }}
-        canvas {{ display: block; background: #1e293b; }}
-        .hud {{
-          position: absolute; top: 10px; left: 10px; right: 10px;
-          display: flex; justify-content: space-between; pointer-events: none;
+        * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: "Courier New", monospace, sans-serif; }}
+        body {{
+          background: #111827;
+          color: #f3f4f6;
+          padding: 8px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }}
-        .badge {{
-          background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px);
-          padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-          border: 1px solid #475569; display: flex; align-items: center; gap: 6px;
+        #sim-wrapper {{
+          position: relative;
+          border-radius: 8px;
+          border: 4px solid #374151;
+          box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+          overflow: hidden;
+          background: #1f2937;
         }}
-        .badge-alex {{ color: #38bdf8; border-color: #0284c7; }}
-        .badge-morgan {{ color: #f43f5e; border-color: #e11d48; }}
-        .log-box {{
-          width: 100%; max-width: 760px; margin-top: 10px;
-          background: #1e293b; border-radius: 8px; border: 1px solid #334155;
-          padding: 10px 14px; font-size: 13px; min-height: 48px;
+        canvas {{
+          display: block;
+          image-rendering: pixelated;
+          image-rendering: crisp-edges;
         }}
-        .log-speaker {{ font-weight: bold; margin-right: 6px; }}
+        .overlay-callout {{
+          position: absolute;
+          background: rgba(17, 24, 39, 0.92);
+          border: 2px solid #60a5fa;
+          border-radius: 6px;
+          padding: 8px 12px;
+          font-size: 11px;
+          max-width: 260px;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+          pointer-events: none;
+        }}
+        .callout-title {{
+          font-weight: bold;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 4px;
+        }}
+        .hud-banner {{
+          position: absolute;
+          top: 8px; left: 8px; right: 8px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          pointer-events: none;
+        }}
+        .retro-tag {{
+          background: #1e293b;
+          border: 2px solid #475569;
+          padding: 4px 10px;
+          font-size: 11px;
+          font-weight: bold;
+          border-radius: 4px;
+        }}
+        .retro-dialogue-box {{
+          width: 100%;
+          max-width: 800px;
+          margin-top: 10px;
+          background: #0f172a;
+          border: 3px solid #475569;
+          border-radius: 6px;
+          padding: 12px 16px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }}
+        .retro-line {{
+          font-size: 12px;
+          line-height: 1.4;
+        }}
+        .speaker-tag {{
+          font-weight: bold;
+          padding: 1px 4px;
+          border-radius: 2px;
+        }}
       </style>
     </head>
     <body>
-      <div id="sim-container">
-        <div class="hud">
-          <div class="badge badge-alex"><span>🧑‍⚖️</span> Alex (Your Counsel)</div>
-          <div class="badge" id="sim-status" style="color: #fbbf24;">📍 In Negotiation</div>
-          <div class="badge badge-morgan"><span>🕴️</span> Morgan (Opposing Counsel)</div>
+      <div id="sim-wrapper">
+        <div class="hud-banner">
+          <div class="retro-tag" style="color: #38bdf8; border-color: #0284c7;">🧑‍⚖️ AGENT ALEX (LEGAL COUNSEL)</div>
+          <div class="retro-tag" id="activity-label" style="color: #facc15; border-color: #ca8a04;">📍 PREPARING IN LAW LIBRARY</div>
+          <div class="retro-tag" style="color: #f87171; border-color: #dc2626;">🕴️ AGENT MORGAN (OPPOSING)</div>
         </div>
-        <canvas id="officeCanvas" width="760" height="380"></canvas>
+        <canvas id="rpgCanvas" width="800" height="420"></canvas>
       </div>
-      <div class="log-box" id="live-dialogue">
-        <span class="log-speaker" style="color: #38bdf8;">🧑‍⚖️ Alex:</span>
-        <span id="log-text">Negotiation simulation initialized. Watch the agents move to the conference table...</span>
+
+      <div class="retro-dialogue-box">
+        <div style="font-size: 10px; color: #94a3b8; font-weight: bold; text-transform: uppercase;">
+          📜 Live Agent Dialogue & Negotiation Feed
+        </div>
+        <div class="retro-line" id="dialogue-feed">
+          <span class="speaker-tag" style="background: #0369a1; color: #fff;">ALEX:</span>
+          <span id="feed-text" style="color: #e2e8f0;">Agents are moving to their positions on the office map...</span>
+        </div>
       </div>
 
       <script>
-        const canvas = document.getElementById('officeCanvas');
+        const canvas = document.getElementById('rpgCanvas');
         const ctx = canvas.getContext('2d');
-        const statusEl = document.getElementById('sim-status');
-        const logTextEl = document.getElementById('log-text');
-        const dialogueBox = document.getElementById('live-dialogue');
+        ctx.imageSmoothingEnabled = false;
 
-        const dialogs = [
-          {{ speaker: "Alex (Your Counsel)", color: "#38bdf8", text: {safe_msg1} }},
-          {{ speaker: "Morgan (Opposing)", color: "#f43f5e", text: {safe_msg2} }},
-          {{ speaker: "Alex (Your Counsel)", color: "#38bdf8", text: {safe_msg3} }}
+        const activityLabel = document.getElementById('activity-label');
+        const feedText = document.getElementById('feed-text');
+        const dialogueFeed = document.getElementById('dialogue-feed');
+
+        const dialogues = [
+          {{ speaker: "ALEX", tagBg: "#0369a1", text: {safe_msg1} }},
+          {{ speaker: "MORGAN", tagBg: "#b91c1c", text: {safe_msg2} }},
+          {{ speaker: "ALEX", tagBg: "#0369a1", text: {safe_msg3} }}
         ];
 
-        // Office Elements Definition
-        const rooms = [
-          {{ name: "RESEARCH LIBRARY", x: 30, y: 30, w: 200, h: 320, color: "#1e293b", floor: "#26354a" }},
-          {{ name: "CONFERENCE ROOM", x: 260, y: 30, w: 240, h: 320, color: "#1e293b", floor: "#1e293b" }},
-          {{ name: "OPPOSING OFFICE", x: 530, y: 30, w: 200, h: 320, color: "#1e293b", floor: "#273244" }}
-        ];
-
-        // Agents
-        const agentAlex = {{
-          x: 100, y: 120, targetX: 330, targetY: 190, speed: 1.4,
-          color: "#0284c7", headColor: "#fde047", name: "Alex", avatar: "🧑‍⚖️",
-          bubble: "", bubbleTimer: 0, bob: 0
-        }};
-
-        const agentMorgan = {{
-          x: 650, y: 280, targetX: 430, targetY: 190, speed: 1.3,
-          color: "#e11d48", headColor: "#fbbf24", name: "Morgan", avatar: "🕴️",
-          bubble: "", bubbleTimer: 0, bob: 0
-        }};
-
-        let phase = 0; // 0: walking to table, 1: speech 1, 2: speech 2, 3: speech 3
-        let speechStep = 0;
-        let timer = 0;
-
-        function drawOffice() {{
-          // Draw floor
-          ctx.fillStyle = "#0f172a";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          // Draw Rooms
-          rooms.forEach(r => {{
-            ctx.fillStyle = r.floor;
-            ctx.fillRect(r.x, r.y, r.w, r.h);
-            ctx.strokeStyle = "#475569";
-            ctx.lineWidth = 3;
-            ctx.strokeRect(r.x, r.y, r.w, r.h);
-
-            // Room labels
-            ctx.fillStyle = "#64748b";
-            ctx.font = "10px sans-serif";
-            ctx.fillText(r.name, r.x + 10, r.y + 20);
-          }});
-
-          // Doorways / openings
-          ctx.fillStyle = "#1e293b";
-          ctx.fillRect(230, 160, 30, 60);
-          ctx.fillRect(500, 160, 30, 60);
-
-          // Furniture: Bookshelves in Library
-          ctx.fillStyle = "#78350f";
-          ctx.fillRect(45, 50, 20, 200);
-          ctx.fillRect(45, 270, 80, 20);
-          ctx.fillStyle = "#fbbf24";
-          ctx.font = "9px sans-serif";
-          ctx.fillText("📚 Case Law", 72, 80);
-
-          // Conference Table & Chairs
-          ctx.fillStyle = "#b45309"; // rich wood table
-          ctx.beginPath();
-          ctx.roundRect(330, 150, 100, 80, [16]);
-          ctx.fill();
-          ctx.strokeStyle = "#d97706";
-          ctx.lineWidth = 2;
-          ctx.stroke();
-
-          // Table Doc Icon
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "14px sans-serif";
-          ctx.fillText("📄 ⚖️", 366, 196);
-
-          // Chairs
-          ctx.fillStyle = "#334155";
-          ctx.fillRect(305, 175, 16, 30); // Left chair
-          ctx.fillRect(439, 175, 16, 30); // Right chair
-
-          // Furniture: Desk in Opposing office
-          ctx.fillStyle = "#475569";
-          ctx.fillRect(580, 80, 90, 40);
-          ctx.fillStyle = "#94a3b8";
-          ctx.font = "9px sans-serif";
-          ctx.fillText("💻 Opposing Desk", 585, 105);
-
-          // Plant in corner
-          ctx.font = "18px sans-serif";
-          ctx.fillText("🪴", 270, 70);
-          ctx.fillText("🪴", 475, 70);
-        }}
-
-        function drawAgent(a) {{
-          // Shadow
-          ctx.fillStyle = "rgba(0,0,0,0.35)";
-          ctx.beginPath();
-          ctx.ellipse(a.x, a.y + 12, 10, 5, 0, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Body
-          const bobOffset = Math.sin(a.bob) * 2;
-          ctx.fillStyle = a.color;
-          ctx.beginPath();
-          ctx.arc(a.x, a.y + bobOffset, 9, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Head / Avatar
-          ctx.font = "16px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText(a.avatar, a.x, a.y - 7 + bobOffset);
-
-          // Speech Bubble
-          if (a.bubble) {{
-            ctx.font = "11px sans-serif";
-            const textWidth = Math.min(220, ctx.measureText(a.bubble).width + 20);
-            const bx = Math.max(10, Math.min(canvas.width - textWidth - 10, a.x - textWidth / 2));
-            const by = a.y - 45 + bobOffset;
-
-            ctx.fillStyle = "#ffffff";
+        // --- 16-BIT RETRO TILE DRAWING HELPERS ---
+        function drawWoodFloor(x, y, w, h) {{
+          ctx.fillStyle = "#a16207"; // warm wood
+          ctx.fillRect(x, y, w, h);
+          // Plank lines
+          ctx.strokeStyle = "#854d0e";
+          ctx.lineWidth = 1;
+          for (let py = y; py < y + h; py += 12) {{
             ctx.beginPath();
-            ctx.roundRect(bx, by, textWidth, 24, [6]);
-            ctx.fill();
-            ctx.strokeStyle = "#0f172a";
-            ctx.lineWidth = 1;
+            ctx.moveTo(x, py);
+            ctx.lineTo(x + w, py);
             ctx.stroke();
-
-            // Tail
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.moveTo(a.x - 4, by + 24);
-            ctx.lineTo(a.x, by + 30);
-            ctx.lineTo(a.x + 4, by + 24);
-            ctx.fill();
-
-            // Text
-            ctx.fillStyle = "#0f172a";
-            ctx.textAlign = "left";
-            const displayText = a.bubble.length > 28 ? a.bubble.substring(0, 26) + "..." : a.bubble;
-            ctx.fillText(displayText, bx + 8, by + 16);
+          }}
+          for (let px = x; px < x + w; px += 36) {{
+            for (let py = y; py < y + h; py += 24) {{
+              ctx.beginPath();
+              ctx.moveTo(px, py);
+              ctx.lineTo(px, py + 12);
+              ctx.stroke();
+            }}
           }}
         }}
 
-        function updateAgent(a) {{
-          const dx = a.targetX - a.x;
-          const dy = a.targetY - a.y;
+        function drawTileFloor(x, y, w, h) {{
+          ctx.fillStyle = "#334155";
+          ctx.fillRect(x, y, w, h);
+          ctx.strokeStyle = "#1e293b";
+          ctx.lineWidth = 1;
+          for (let px = x; px < x + w; px += 16) {{
+            ctx.beginPath();
+            ctx.moveTo(px, y);
+            ctx.lineTo(px, y + h);
+            ctx.stroke();
+          }}
+          for (let py = y; py < y + h; py += 16) {{
+            ctx.beginPath();
+            ctx.moveTo(x, py);
+            ctx.lineTo(x + w, py);
+            ctx.stroke();
+          }}
+        }}
+
+        function drawWall(x, y, w, h) {{
+          ctx.fillStyle = "#64748b";
+          ctx.fillRect(x, y, w, h);
+          // Wall shadow
+          ctx.fillStyle = "#475569";
+          ctx.fillRect(x, y + h - 4, w, 4);
+          ctx.strokeStyle = "#334155";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x, y, w, h);
+        }}
+
+        // Agents in Smallville RPG Sprite Style
+        const alex = {{
+          x: 120, y: 140,
+          targetX: 350, targetY: 220,
+          name: "Alex",
+          shirt: "#0284c7",
+          hair: "#fde047",
+          bubble: "",
+          step: 0,
+          dir: 1
+        }};
+
+        const morgan = {{
+          x: 680, y: 310,
+          targetX: 450, targetY: 220,
+          name: "Morgan",
+          shirt: "#dc2626",
+          hair: "#1e293b",
+          bubble: "",
+          step: 0,
+          dir: -1
+        }};
+
+        let phase = 0;
+        let timer = 0;
+
+        function drawSprite(agent) {{
+          const {{ x, y, shirt, hair, step }} = agent;
+          const bob = Math.sin(step) * 2;
+
+          // Drop shadow
+          ctx.fillStyle = "rgba(0,0,0,0.4)";
+          ctx.beginPath();
+          ctx.ellipse(x, y + 14, 8, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Legs / Shoes
+          ctx.fillStyle = "#0f172a";
+          const legSpread = Math.sin(step * 2) * 3;
+          ctx.fillRect(x - 5 + legSpread, y + 8, 4, 6);
+          ctx.fillRect(x + 1 - legSpread, y + 8, 4, 6);
+
+          // Body / Suit
+          ctx.fillStyle = shirt;
+          ctx.fillRect(x - 6, y - 2 + bob, 12, 11);
+
+          // Tie
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(x - 1, y - 1 + bob, 2, 7);
+
+          // Head
+          ctx.fillStyle = "#fed7aa"; // skin
+          ctx.fillRect(x - 5, y - 12 + bob, 10, 10);
+
+          // Hair
+          ctx.fillStyle = hair;
+          ctx.fillRect(x - 6, y - 15 + bob, 12, 5);
+          ctx.fillRect(x - 6, y - 12 + bob, 2, 4);
+
+          // Smallville-style Tag Bubble: [AL: ⚖️]
+          if (agent.bubble) {{
+            const bubbleWidth = Math.min(240, agent.bubble.length * 6.5 + 24);
+            const bx = Math.max(10, Math.min(canvas.width - bubbleWidth - 10, x - bubbleWidth / 2));
+            const by = y - 48 + bob;
+
+            // White Pixel Box with Black Border
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(bx, by, bubbleWidth, 24);
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(bx, by, bubbleWidth, 24);
+
+            // Bubble Tail
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.moveTo(x - 4, by + 24);
+            ctx.lineTo(x, by + 30);
+            ctx.lineTo(x + 4, by + 24);
+            ctx.fill();
+            ctx.strokeStyle = "#000000";
+            ctx.beginPath();
+            ctx.moveTo(x - 4, by + 24);
+            ctx.lineTo(x, by + 30);
+            ctx.lineTo(x + 4, by + 24);
+            ctx.stroke();
+
+            // Bubble Text
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 10px monospace";
+            const tag = agent === alex ? "AL: " : "MO: ";
+            const snippet = agent.bubble.length > 25 ? agent.bubble.substring(0, 23) + "..." : agent.bubble;
+            ctx.fillText(tag + snippet, bx + 6, by + 16);
+          }}
+        }}
+
+        function moveAgent(agent) {{
+          const dx = agent.targetX - agent.x;
+          const dy = agent.targetY - agent.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist > 2) {{
-            a.x += (dx / dist) * a.speed;
-            a.y += (dy / dist) * a.speed;
-            a.bob += 0.2;
+            agent.x += (dx / dist) * 1.5;
+            agent.y += (dy / dist) * 1.5;
+            agent.step += 0.2;
             return false;
           }} else {{
-            a.x = a.targetX;
-            a.y = a.targetY;
+            agent.x = agent.targetX;
+            agent.y = agent.targetY;
+            agent.step = 0;
             return true;
           }}
         }}
 
+        function drawMap() {{
+          // Outside courtyard grass
+          ctx.fillStyle = "#4ade80";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Outer walls
+          drawWall(20, 20, 760, 16);
+          drawWall(20, 380, 760, 16);
+          drawWall(20, 20, 16, 376);
+          drawWall(764, 20, 16, 376);
+
+          // Room 1: Research Library (Left)
+          drawWoodFloor(36, 36, 220, 344);
+          drawWall(256, 36, 12, 130);
+          drawWall(256, 230, 12, 150); // doorway at 166-230
+
+          // Room 2: Main Conference & Negotiation Hall (Center)
+          drawTileFloor(268, 36, 260, 344);
+          drawWall(528, 36, 12, 130);
+          drawWall(528, 230, 12, 150); // doorway
+
+          // Room 3: Opposing Counsel Chambers (Right)
+          drawWoodFloor(540, 36, 224, 344);
+
+          // Room Labels
+          ctx.fillStyle = "#cbd5e1";
+          ctx.font = "bold 10px monospace";
+          ctx.fillText("📚 LAW LIBRARY", 50, 56);
+          ctx.fillText("⚖️ NEGOTIATION SUITE", 330, 56);
+          ctx.fillText("💼 OPPOSING OFFICE", 580, 56);
+
+          // Furniture: Bookshelves in Library
+          ctx.fillStyle = "#78350f";
+          for (let by = 70; by < 330; by += 50) {{
+            ctx.fillRect(50, by, 30, 36);
+            ctx.fillStyle = "#fef08a";
+            ctx.fillRect(54, by + 4, 22, 6);
+            ctx.fillStyle = "#93c5fd";
+            ctx.fillRect(54, by + 14, 22, 6);
+            ctx.fillStyle = "#f87171";
+            ctx.fillRect(54, by + 24, 22, 6);
+            ctx.fillStyle = "#78350f";
+          }}
+
+          // Furniture: Conference Table & Chairs (Center)
+          // Table Rug
+          ctx.fillStyle = "#991b1b";
+          ctx.fillRect(330, 170, 140, 100);
+          ctx.strokeStyle = "#fef08a";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(330, 170, 140, 100);
+
+          // Oak Conference Table
+          ctx.fillStyle = "#b45309";
+          ctx.fillRect(350, 190, 100, 60);
+          ctx.strokeStyle = "#78350f";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(350, 190, 100, 60);
+
+          // Papers & Contract on Table
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(380, 205, 14, 18);
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(383, 209, 8, 2);
+          ctx.fillRect(383, 213, 8, 2);
+          ctx.fillRect(383, 217, 8, 2);
+
+          // Chairs
+          ctx.fillStyle = "#1e293b";
+          ctx.fillRect(330, 205, 14, 30); // Alex chair
+          ctx.fillRect(456, 205, 14, 30); // Morgan chair
+
+          // Furniture: Opposing Desk
+          ctx.fillStyle = "#475569";
+          ctx.fillRect(600, 120, 90, 44);
+          ctx.fillStyle = "#0284c7";
+          ctx.fillRect(630, 130, 16, 12); // laptop
+
+          // Indoor Plants
+          ctx.fillStyle = "#15803d";
+          ctx.beginPath();
+          ctx.arc(280, 70, 10, 0, Math.PI * 2);
+          ctx.arc(516, 70, 10, 0, Math.PI * 2);
+          ctx.fill();
+        }}
+
         function loop() {{
-          drawOffice();
+          drawMap();
 
-          const alexArrived = updateAgent(agentAlex);
-          const morganArrived = updateAgent(agentMorgan);
+          const alexReady = moveAgent(alex);
+          const morganReady = moveAgent(morgan);
 
-          drawAgent(agentAlex);
-          drawAgent(agentMorgan);
+          drawSprite(alex);
+          drawSprite(morgan);
 
-          // State Machine
           if (phase === 0) {{
-            statusEl.innerText = "🚶 Approaching Conference Table...";
-            if (alexArrived && morganArrived) {{
+            activityLabel.innerText = "🚶 EN ROUTE TO NEGOTIATION SUITE";
+            alex.bubble = "Gathering legal precedents...";
+            morgan.bubble = "Reviewing clause demands...";
+            if (alexReady && morganReady) {{
               phase = 1;
               timer = 0;
             }}
           }} else if (phase === 1) {{
-            statusEl.innerText = "🗣️ Alex Presenting Objection";
-            agentAlex.bubble = dialogs[0].text;
-            agentMorgan.bubble = "";
-            logTextEl.innerText = dialogs[0].text;
-            dialogueBox.style.borderColor = "#0284c7";
+            activityLabel.innerText = "🗣️ ALEX CHALLENGING UNFAIR TERMS";
+            alex.bubble = dialogues[0].text;
+            morgan.bubble = "";
+            dialogueFeed.innerHTML = '<span class="speaker-tag" style="background:#0369a1;color:#fff;">ALEX:</span> ' + dialogues[0].text;
             timer++;
-            if (timer > 180) {{
+            if (timer > 200) {{
               phase = 2;
               timer = 0;
             }}
           }} else if (phase === 2) {{
-            statusEl.innerText = "🗣️ Morgan Offering Compromise";
-            agentAlex.bubble = "";
-            agentMorgan.bubble = dialogs[1].text;
-            logTextEl.innerText = dialogs[1].text;
-            dialogueBox.style.borderColor = "#e11d48";
+            activityLabel.innerText = "🗣️ MORGAN OFFERING COUNTER-DEFENSE";
+            alex.bubble = "";
+            morgan.bubble = dialogues[1].text;
+            dialogueFeed.innerHTML = '<span class="speaker-tag" style="background:#b91c1c;color:#fff;">MORGAN:</span> ' + dialogues[1].text;
             timer++;
-            if (timer > 180) {{
+            if (timer > 200) {{
               phase = 3;
               timer = 0;
             }}
           }} else if (phase === 3) {{
-            statusEl.innerText = "🤝 Finalizing Protective Terms";
-            agentAlex.bubble = dialogs[2].text;
-            agentMorgan.bubble = "";
-            logTextEl.innerText = dialogs[2].text;
-            dialogueBox.style.borderColor = "#10b981";
+            activityLabel.innerText = "🤝 FINALIZING PROTECTIVE AGREEMENT";
+            alex.bubble = dialogues[2].text;
+            morgan.bubble = "";
+            dialogueFeed.innerHTML = '<span class="speaker-tag" style="background:#0369a1;color:#fff;">ALEX (COUNTER):</span> ' + dialogues[2].text;
             timer++;
-            if (timer > 220) {{
-              statusEl.innerText = "✅ Negotiation Complete";
+            if (timer > 240) {{
               phase = 4;
             }}
+          }} else if (phase === 4) {{
+            activityLabel.innerText = "✅ NEGOTIATION REACHED";
+            alex.bubble = "Terms finalized.";
+            morgan.bubble = "Acknowledged.";
           }}
 
           requestAnimationFrame(loop);
