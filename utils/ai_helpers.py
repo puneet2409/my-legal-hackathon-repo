@@ -5,11 +5,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
-    client = genai.Client()
+    api_key = os.environ.get("GEMINI_API_KEY")
+    client = genai.Client(api_key=api_key) if api_key else None
 except Exception:
     client = None
 
-MODEL_ID = 'gemini-2.5-flash'
+MODEL_ID = 'gemini-3.6-flash'
 
 def get_document_summary(document_text: str, language: str = "English") -> str:
     """
