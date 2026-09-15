@@ -38,7 +38,7 @@ The application logic follows a clear pipeline:
 ## 🛠 Tech Stack
 *   **Frontend/UI:** Streamlit
 *   **AI/LLM:** Google Gemini API (`google-genai` SDK)
-*   **PDF Parsing:** PyPDF2
+*   **PDF Parsing:** pypdf
 *   **Testing:** Pytest
 
 ---

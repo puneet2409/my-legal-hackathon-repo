@@ -1,4 +1,4 @@
-import PyPDF2
+import pypdf
 import io
 
 def extract_text_from_file(uploaded_file) -> str:
@@ -24,7 +24,7 @@ def extract_text_from_file(uploaded_file) -> str:
             
         elif file_type == 'pdf':
             # Read PDF file
-            pdf_reader = PyPDF2.PdfReader(uploaded_file)
+            pdf_reader = pypdf.PdfReader(uploaded_file)
             text = ""
             for page in pdf_reader.pages:
                 extracted = page.extract_text()
