@@ -12,7 +12,12 @@ st.set_page_config(page_title="LegalLens v3: GenAI Legal Assistant", page_icon="
 def main():
     st.title("⚖️ LegalLens: AI Legal Co-Pilot & Simulator")
     st.markdown("Upload a contract to summarize it, spot risks, or watch autonomous AI agents negotiate it live.")
-    st.warning("**DISCLAIMER:** This tool uses AI for informational assistance. It is **NOT** a replacement for professional legal advice.", icon="⚠️")
+    
+    if not st.session_state.get("disclaimer_dismissed", False):
+        st.warning("**DISCLAIMER:** This tool uses AI for informational assistance. It is **NOT** a replacement for professional legal advice.", icon="⚠️")
+        if st.button("I Understand & Agree"):
+            st.session_state.disclaimer_dismissed = True
+            st.rerun()
     
     # Sidebar
     st.sidebar.header("🌐 Settings")
